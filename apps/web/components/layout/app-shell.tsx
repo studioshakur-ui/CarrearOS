@@ -1,15 +1,7 @@
 import Link from "next/link";
-import { BriefcaseBusiness, FileText, LayoutDashboard, UserCircle2 } from "lucide-react";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-
-const navigation = [
-  { href: "/app/onboarding", label: "Onboarding", icon: LayoutDashboard },
-  { href: "/app/jobs", label: "Jobs", icon: BriefcaseBusiness },
-  { href: "/app/profile", label: "Profile", icon: UserCircle2 },
-  { href: "/app/cv", label: "CV", icon: FileText },
-];
+import { NavLinks } from "@/components/layout/nav-links";
 
 type AppShellProps = {
   title: string;
@@ -33,20 +25,7 @@ export function AppShell({ title, eyebrow, description, userEmail, logoutAction,
             </p>
           </Link>
 
-          <nav className="mt-8 space-y-1">
-            {navigation.map(({ href, label, icon: Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                className={cn(
-                  "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-950",
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                <span>{label}</span>
-              </Link>
-            ))}
-          </nav>
+          <NavLinks />
         </aside>
 
         <div className="flex min-h-screen flex-1 flex-col">

@@ -127,5 +127,5 @@ export async function saveOnboardingAction(
     }
   }
 
-  redirect("/app/jobs");
+  redirect("/app/profile");
 }
