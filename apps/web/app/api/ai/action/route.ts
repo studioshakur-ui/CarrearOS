@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   const [{ data: aiProfile }, { data: job }, { data: existingMatch }] = await Promise.all([
     supabase
       .from("ai_profiles")
-      .select("id, professional_summary, first_name, last_name, detected_skills, seniority_estimate")
+      .select("id, professional_summary, detected_skills, seniority_estimate")
       .eq("profile_id", user.id)
       .order("created_at", { ascending: false })
       .limit(1)
@@ -59,15 +59,17 @@ export async function POST(request: Request) {
     );
   }
 
-  // ── Return cached result if it already exists ──────────────────────────────
+  // ── Return cached result only if tailored_cv is already present ────────────
   const { data: existing } = await supabase
     .from("ai_actions")
-    .select("id, should_apply, rationale, next_steps, message_draft, cover_note, cv_improvement_points")
+    .select(
+      "id, should_apply, rationale, next_steps, message_draft, cover_note, cv_improvement_points, tailored_cv",
+    )
     .eq("profile_id", user.id)
     .eq("job_id", jobId)
     .maybeSingle();
 
-  if (existing) return NextResponse.json({ cached: true, ...existing });
+  if (existing?.tailored_cv) return NextResponse.json({ cached: true, ...existing });
 
   // ── API key ─────────────────────────────────────────────────────────────────
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -81,7 +83,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Stored match data is invalid" }, { status: 500 });
   }
 
-  // ── Fetch profile metadata needed for action prompt ────────────────────────
+  // ── Fetch profile name for personalisation ─────────────────────────────────
   const { data: profile } = await supabase
     .from("profiles")
     .select("first_name, last_name")
@@ -123,6 +125,7 @@ export async function POST(request: Request) {
         message_draft: actionOutput.message_draft,
         cover_note: actionOutput.cover_note,
         cv_improvement_points: actionOutput.cv_improvement_points,
+        tailored_cv: actionOutput.tailored_cv,
         model_name: ACTION_MODEL,
         prompt_version: ACTION_PROMPT_VERSION,
       },
