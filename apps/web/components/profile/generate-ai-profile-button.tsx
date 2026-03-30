@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-export function GenerateAiProfileButton() {
+type Props = {
+  /** Auto-trigger analysis on mount. Use when the user just uploaded a CV. */
+  autoGenerate?: boolean;
+};
+
+export function GenerateAiProfileButton({ autoGenerate = false }: Props) {
   const router = useRouter();
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -20,12 +25,7 @@ export function GenerateAiProfileButton() {
 
     if (!res.ok) {
       setStatus("error");
-      setError(json.error ?? "Unknown error");
-      return;
-    }
-
-    if (json.cached) {
-      setStatus("idle");
+      setError(json.error ?? "Analysis failed. Please try again.");
       return;
     }
 
@@ -33,11 +33,19 @@ export function GenerateAiProfileButton() {
     router.refresh();
   }
 
+  // Auto-trigger once on mount when instructed (e.g. after first CV upload)
+  useEffect(() => {
+    if (autoGenerate) {
+      handleGenerate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="space-y-2">
-      <Button onClick={handleGenerate} disabled={status === "loading"} variant="outline" size="sm">
-        <Sparkles className="mr-2 h-4 w-4" />
-        {status === "loading" ? "Generating…" : "Generate AI profile"}
+      <Button onClick={handleGenerate} disabled={status === "loading"} size="sm" variant="outline">
+        <Sparkles className="mr-2 h-3.5 w-3.5" />
+        {status === "loading" ? "Analysing your profile…" : "Generate AI profile"}
       </Button>
       {error ? <p className="text-xs text-red-600">{error}</p> : null}
     </div>
