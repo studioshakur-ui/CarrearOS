@@ -13,33 +13,30 @@ type AppShellProps = {
 
 export function AppShell({ userEmail, logoutAction, children }: AppShellProps) {
   return (
-    <div className="flex min-h-screen bg-[#111111]">
+    <div className="flex min-h-screen">
 
       {/* ── Sidebar ──────────────────────────────────────────────────────── */}
-      <aside className="hidden w-56 shrink-0 flex-col border-r border-white/[0.06] bg-[#0a0a0a] lg:flex">
+      <aside className="hidden w-52 shrink-0 flex-col border-r border-white/[0.07] bg-[#0d0d0d] lg:flex">
 
         {/* Logo */}
-        <div className="px-5 pt-6 pb-5 border-b border-white/[0.06]">
-          <Link href="/" className="block">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/30">Career Agent</p>
-            <p className="mt-0.5 text-sm font-semibold text-white/80">Gulf Career Intelligence</p>
+        <div className="px-5 pt-6 pb-5 border-b border-white/[0.07]">
+          <Link href="/" className="block group">
+            <p className="text-[9px] font-semibold uppercase tracking-[0.26em] text-white/25">Career Agent</p>
+            <p className="mt-1 text-[13px] font-semibold leading-tight text-white/75">Gulf Career<br />Intelligence</p>
           </Link>
         </div>
 
         {/* Nav */}
-        <div className="flex-1 overflow-y-auto px-3 py-4">
+        <div className="flex-1 overflow-y-auto px-2.5 py-4">
           <NavLinks />
         </div>
 
         {/* User footer */}
-        <div className="border-t border-white/[0.06] px-4 py-4">
-          <p className="truncate text-[11px] text-white/30">{userEmail}</p>
+        <div className="border-t border-white/[0.07] px-4 py-4">
+          <p className="truncate text-[11px] text-white/25">{userEmail}</p>
           {logoutAction && (
             <form action={logoutAction} className="mt-2">
-              <button
-                type="submit"
-                className="text-[11px] font-medium text-white/30 transition hover:text-white/60"
-              >
+              <button type="submit" className="text-[11px] font-medium text-white/25 transition hover:text-white/50">
                 Sign out
               </button>
             </form>
@@ -48,8 +45,8 @@ export function AppShell({ userEmail, logoutAction, children }: AppShellProps) {
       </aside>
 
       {/* ── Main ─────────────────────────────────────────────────────────── */}
-      <main className="flex-1 overflow-hidden bg-[#f9f9f9]">
-        <div className="h-full min-h-screen overflow-y-auto px-8 py-8 lg:px-12">
+      <main className="flex-1 min-w-0 bg-white">
+        <div className="h-full min-h-screen px-10 py-10">
           {children}
         </div>
       </main>

@@ -7,3 +7,5 @@ dist
 .turbo
 *.tsbuildinfo
 supabase/.temp
+
+.vercel

@@ -31,10 +31,10 @@ type ScreenId = (typeof SCREENS)[number]["id"];
 
 function JobsScreen() {
   const jobs = [
-    { title: "Senior React Engineer", company: "Noon", city: "Dubai", score: 84, level: "Senior", remote: "Hybrid", skills: ["React", "TypeScript", "Next.js"], color: "bg-emerald-500" },
-    { title: "Staff Engineer",        company: "Majid Al Futtaim", city: "Dubai", score: 71, level: "Lead",   remote: "Hybrid", skills: ["Node.js", "System Design"], color: "bg-emerald-500" },
-    { title: "Senior ML Engineer",    company: "G42",              city: "Abu Dhabi", score: 48, level: "Senior", remote: "Hybrid", skills: ["Python", "PyTorch"], color: "bg-amber-400" },
-    { title: "Platform Engineer",     company: "ADNOC Digital",   city: "Abu Dhabi", score: 40, level: "Senior", remote: "Onsite", skills: ["AWS", "Terraform"], color: "bg-amber-400" },
+    { title: "Senior React Engineer", company: "Noon", city: "Dubai", score: 84, remote: "Hybrid", skills: ["React", "TypeScript", "Next.js"], color: "bg-emerald-500" },
+    { title: "Staff Engineer",        company: "Majid Al Futtaim", city: "Dubai", score: 71, remote: "Hybrid", skills: ["Node.js", "System Design"], color: "bg-emerald-500" },
+    { title: "Senior ML Engineer",    company: "G42",              city: "Abu Dhabi", score: 48, remote: "Hybrid", skills: ["Python", "PyTorch"], color: "bg-amber-400" },
+    { title: "Platform Engineer",     company: "ADNOC Digital",    city: "Abu Dhabi", score: 40, remote: "Onsite", skills: ["AWS", "Terraform"], color: "bg-amber-400" },
   ];
 
   return (
@@ -47,11 +47,8 @@ function JobsScreen() {
         {jobs.map((job, i) => (
           <div
             key={job.title}
-            className="flex items-center gap-3 px-4 py-2.5 transition-colors"
-            style={{
-              animationDelay: `${i * 80}ms`,
-              opacity: 1,
-            }}
+            className="flex items-center gap-3 px-4 py-2.5"
+            style={{ animationDelay: `${i * 80}ms` }}
           >
             <div className={`h-full w-0.5 self-stretch rounded-full ${job.color}`} />
             <div className="min-w-0 flex-1">
@@ -82,16 +79,13 @@ function JobsScreen() {
 function DetailScreen() {
   return (
     <div className="flex h-full flex-col">
-      {/* Verdict banner */}
       <div className="flex items-center gap-3 bg-emerald-600 px-4 py-4">
         <span className="text-2xl font-bold text-white">Apply</span>
         <div className="h-6 w-px bg-white/30" />
         <span className="text-2xl font-semibold text-white">84%</span>
         <p className="text-[10px] leading-tight text-white/80">Strong skill match with minor gaps in PostgreSQL at scale</p>
       </div>
-
       <div className="flex-1 overflow-hidden px-4 py-3 space-y-3">
-        {/* Strengths */}
         <div>
           <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-widest text-slate-400">Strengths</p>
           {["React & TypeScript depth", "GraphQL production experience", "Next.js delivery pipeline"].map((s) => (
@@ -100,8 +94,6 @@ function DetailScreen() {
             </p>
           ))}
         </div>
-
-        {/* Gaps */}
         <div>
           <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-widest text-slate-400">Gaps</p>
           {["PostgreSQL at scale", "GraphQL subscriptions"].map((g) => (
@@ -110,8 +102,6 @@ function DetailScreen() {
             </p>
           ))}
         </div>
-
-        {/* Score bar */}
         <div className="pt-1">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[9px] text-slate-400">Skill match</span>
@@ -134,9 +124,7 @@ function KitScreen() {
           ✓ Kit ready · Noon · Senior React Engineer
         </span>
       </div>
-
       <div className="flex-1 overflow-hidden divide-y divide-slate-100">
-        {/* Message */}
         <div className="px-4 py-3">
           <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-widest text-slate-400">Ready-to-send message</p>
           <p className="rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-[10px] italic leading-[1.6] text-slate-600">
@@ -144,8 +132,6 @@ function KitScreen() {
             With 5 years building React and TypeScript products in production, including two Next.js apps with GraphQL, I can contribute immediately…&rdquo;
           </p>
         </div>
-
-        {/* Checklist */}
         <div className="px-4 py-3">
           <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-widest text-slate-400">Application checklist</p>
           {[
@@ -170,8 +156,7 @@ function KitScreen() {
 
 function BrowserChrome({ url, children }: { url: string; children: React.ReactNode }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10">
-      {/* Chrome bar */}
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl shadow-black/40">
       <div className="flex items-center gap-3 border-b border-slate-100 bg-slate-50 px-4 py-2.5">
         <div className="flex gap-1.5">
           <div className="h-2.5 w-2.5 rounded-full bg-red-400" />
@@ -182,7 +167,6 @@ function BrowserChrome({ url, children }: { url: string; children: React.ReactNo
           <p className="text-[10px] text-slate-400">{url}</p>
         </div>
       </div>
-      {/* Content */}
       <div className="h-[340px]">{children}</div>
     </div>
   );
@@ -190,7 +174,7 @@ function BrowserChrome({ url, children }: { url: string; children: React.ReactNo
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function ProductDemo() {
+export function ProductDemo({ dark = false }: { dark?: boolean }) {
   const [active, setActive] = useState<ScreenId>("jobs");
   const [transitioning, setTransitioning] = useState(false);
 
@@ -231,11 +215,13 @@ export function ProductDemo() {
             onClick={() => switchTo(screen.id)}
             className={`flex-1 rounded-lg border px-3 py-2 text-left transition-all duration-200 ${
               screen.id === active
-                ? "border-slate-900 bg-slate-950 text-white"
+                ? "border-slate-600 bg-slate-800 text-white"
+                : dark
+                ? "border-slate-700 bg-slate-900 text-slate-500 hover:border-slate-600 hover:text-slate-400"
                 : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
             }`}
           >
-            <p className="text-[9px] font-semibold uppercase tracking-widest opacity-60">
+            <p className="text-[9px] font-semibold uppercase tracking-widest opacity-70">
               {screen.label}
             </p>
           </button>
@@ -244,7 +230,7 @@ export function ProductDemo() {
 
       {/* Caption */}
       <p
-        className="mb-3 min-h-[1.25rem] text-xs text-slate-500 transition-opacity duration-300"
+        className={`mb-3 min-h-[1.25rem] text-xs transition-opacity duration-300 ${dark ? "text-slate-500" : "text-slate-500"}`}
         style={{ opacity: transitioning ? 0 : 1 }}
       >
         {current.description}
@@ -269,7 +255,11 @@ export function ProductDemo() {
             key={screen.id}
             onClick={() => switchTo(screen.id)}
             className={`h-1 rounded-full transition-all duration-300 ${
-              screen.id === active ? "w-6 bg-slate-900" : "w-1.5 bg-slate-300"
+              screen.id === active
+                ? "w-6 bg-slate-400"
+                : dark
+                ? "w-1.5 bg-slate-700"
+                : "w-1.5 bg-slate-300"
             }`}
           />
         ))}

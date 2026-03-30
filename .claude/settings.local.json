@@ -25,7 +25,26 @@
       "Bash(powershell -Command \"Stop-Process -Id 29036 -Force; Stop-Process -Id 28764 -Force\")",
       "Bash(curl -s http://localhost:3000/ -D -)",
       "Bash(curl -s \"http://localhost:3000/_next/static/css/app/layout.css\")",
-      "Bash(powershell -Command \"Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force\")"
+      "Bash(powershell -Command \"Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/app/onboarding)",
+      "Bash(sed -i 's/\\\\$\\\\$\\\\\\(You\\\\|Join\\\\|Wio\\\\|We are\\\\|du is\\\\|Emirates\\\\|Chalhoub\\\\|Talabat\\\\|Tamara\\\\|Saudi Aramco\\\\\\)/\\\\$desc\\\\$\\\\1/g; s/\\\\.\\\\$\\\\$/.\\\\$desc\\\\$/g' supabase/migrations/202603290021_seed_jobs.sql)",
+      "Bash(grep -c '\\\\$desc\\\\$' supabase/migrations/202603290021_seed_jobs.sql)",
+      "Bash(grep -n '\\\\$\\\\$\\\\|\\\\$desc\\\\$' C:/Users/hamid/OneDrive/Documents/dev/CarrearOS/supabase/migrations/202603290021_seed_jobs.sql)",
+      "Bash(npx vercel:*)",
+      "Read(//c/Users/hamid/.local/share/**)",
+      "Read(//c/Users/hamid/**)",
+      "Read(//c/Users/hamid/OneDrive/Documents/dev/CarrearOS/$APPDATA/**)",
+      "Bash(find /c/Users/hamid/AppData -name *.json -path *vercel*)",
+      "Bash(find C:/Users/hamid/OneDrive/Documents/dev/CarrearOS/apps/web/app -name *.tsx -o -name *.ts)",
+      "Bash(cat C:/Users/hamid/OneDrive/Documents/dev/CarrearOS/apps/web/app/app/jobs/[id]/page.tsx)",
+      "Bash(node -e \"const {execSync}=require\\(''child_process''\\); try { execSync\\(''npx vercel deploy --prod --yes'', {stdio:''inherit'', timeout: 240000}\\); } catch\\(e\\) { process.exit\\(1\\); }\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(node -e \"require\\(''child_process''\\).execSync\\(''npx vercel deploy --prod --yes'', {stdio:''inherit'', cwd: process.cwd\\(\\), timeout:300000}\\)\")",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(exit 0)",
+      "Bash(powershell \"Get-Process -Id 31728 | Stop-Process -Force\")"
     ]
   }
 }

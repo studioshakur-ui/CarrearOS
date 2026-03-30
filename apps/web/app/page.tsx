@@ -5,14 +5,6 @@ import { Reveal } from "@/components/landing/reveal";
 
 // ─── Primitives ───────────────────────────────────────────────────────────────
 
-function Label({ children, light = false }: { children: React.ReactNode; light?: boolean }) {
-  return (
-    <p className={`text-xs font-semibold uppercase tracking-[0.22em] ${light ? "text-slate-500" : "text-slate-400"}`}>
-      {children}
-    </p>
-  );
-}
-
 function Divider() {
   return <div className="h-px w-full bg-slate-100" />;
 }
@@ -21,94 +13,94 @@ function Divider() {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen">
-      {/* ── Nav ─────────────────────────────────────────────────────────────── */}
-      <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6">
-        <span className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-950">Career Agent</span>
-        <div className="flex items-center gap-6">
-          <Link href="/login" className="text-xs font-medium text-slate-500 transition hover:text-slate-900">
-            Sign in
-          </Link>
-          <Link
-            href="/signup"
-            className="inline-flex h-9 items-center rounded-xl bg-slate-950 px-5 text-xs font-semibold text-white transition hover:bg-slate-700"
-          >
-            Get access
-          </Link>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-white">
 
-      {/* ── Hero ────────────────────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-5xl px-6 pb-10 pt-16">
-        <div className="max-w-2xl">
-          <p className="hero-label">
-            <Label>UAE Career Intelligence</Label>
-          </p>
-          <h1 className="hero-h1 mt-5 text-5xl font-semibold leading-[1.1] tracking-tight text-slate-950 sm:text-6xl">
-            Every serious application,<br />
-            <span className="text-slate-400">done with precision.</span>
-          </h1>
-          <p className="hero-body mt-7 max-w-xl text-lg leading-8 text-slate-600">
-            Career Agent reads your CV, analyses every UAE role you view, and tells you exactly where you stand —
-            fit score, real gaps, a tailored message, and an optimised CV. Ready before the deadline.
-          </p>
-          <div className="hero-cta mt-10 flex flex-wrap items-center gap-4">
+      {/* ══ DARK ZONE ══════════════════════════════════════════════════════════ */}
+      <div className="bg-slate-950">
+
+        {/* ── Nav ─────────────────────────────────────────────────────────── */}
+        <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
+          <span className="text-xs font-semibold uppercase tracking-[0.22em] text-white">
+            Career Agent
+          </span>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/login"
+              className="text-xs font-medium text-slate-400 transition hover:text-white"
+            >
+              Sign in
+            </Link>
             <Link
               href="/signup"
-              className="inline-flex h-12 items-center rounded-xl bg-slate-950 px-8 text-sm font-semibold text-white transition hover:bg-slate-700"
+              className="inline-flex h-8 items-center rounded-lg bg-white px-4 text-xs font-semibold text-slate-950 transition hover:bg-slate-100"
+            >
+              Get access
+            </Link>
+          </div>
+        </nav>
+
+        {/* ── Hero ────────────────────────────────────────────────────────── */}
+        <section className="hero-spotlight mx-auto max-w-4xl px-6 pb-14 pt-20 text-center">
+          <p className="hero-label inline-flex items-center rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+            UAE Career Intelligence
+          </p>
+          <h1 className="hero-h1 mt-6 text-6xl font-semibold leading-[1.08] tracking-tight text-white sm:text-7xl">
+            Every serious application,
+            <br />
+            <span className="text-slate-500">done with precision.</span>
+          </h1>
+          <p className="hero-body mx-auto mt-6 max-w-xl text-lg leading-8 text-slate-400">
+            Career Agent reads your CV, analyses every UAE role you view, and
+            tells you exactly where you stand — fit score, real gaps, a
+            tailored message. Ready before the deadline.
+          </p>
+          <div className="hero-cta mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/signup"
+              className="inline-flex h-12 items-center rounded-xl bg-white px-8 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
             >
               Start for free
             </Link>
-            <Link href="/login" className="text-sm font-medium text-slate-500 transition hover:text-slate-800">
-              Already have an account →
+            <Link
+              href="/login"
+              className="inline-flex h-12 items-center rounded-xl border border-slate-700 px-8 text-sm font-medium text-slate-300 transition hover:border-slate-500 hover:text-white"
+            >
+              Sign in
             </Link>
           </div>
-          <p className="hero-hint mt-5 text-xs text-slate-400">No credit card. UAE roles only. Serious candidates.</p>
-        </div>
-      </section>
+          <p className="hero-hint mt-4 text-xs text-slate-600">
+            No credit card. UAE roles only. Serious candidates.
+          </p>
+        </section>
 
-      {/* ── Product demo ────────────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-5xl px-6 py-6 pb-16">
-        <Reveal>
-          <div className="grid gap-12 lg:grid-cols-[1fr_1.5fr] lg:items-start">
-            {/* Left: context */}
-            <div className="pt-2">
-              <Label>Live demo</Label>
-              <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950">
-                From job list<br />to application kit.
-              </h2>
-              <p className="mt-4 text-sm leading-7 text-slate-500">
-                See exactly how Career Agent works — matched jobs, instant verdict, and the full kit in three steps.
-              </p>
-              <div className="mt-8 space-y-4">
-                {[
-                  { n: "1", t: "Browse scored roles", d: "Jobs ranked by your exact skill match before you open a single one." },
-                  { n: "2", t: "Instant fit analysis", d: "Apply, Consider, or Pass — visible in under 3 seconds with reasons." },
-                  { n: "3", t: "One-click kit", d: "Tailored message, CV snapshot, and a checklist generated on demand." },
-                ].map((item) => (
-                  <div key={item.n} className="flex gap-4">
-                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-[10px] font-bold text-slate-400 shadow-sm">
-                      {item.n}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">{item.t}</p>
-                      <p className="mt-0.5 text-xs leading-5 text-slate-500">{item.d}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Right: animated demo */}
-            <ProductDemo />
+        {/* ── Social proof ────────────────────────────────────────────────── */}
+        <div className="hero-proof border-t border-slate-800/60 py-5">
+          <p className="mb-3 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-600">
+            Roles from leading UAE employers
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 px-6">
+            {["Noon", "Careem", "G42", "ADNOC", "FAB", "Mastercard", "e&", "Mubadala"].map(
+              (co) => (
+                <span key={co} className="text-xs font-semibold text-slate-500">
+                  {co}
+                </span>
+              )
+            )}
           </div>
-        </Reveal>
-      </section>
+        </div>
 
-      <Divider />
+        {/* ── Product demo ────────────────────────────────────────────────── */}
+        <section className="mx-auto max-w-4xl px-6 pb-20 pt-10">
+          <Reveal>
+            <ProductDemo dark />
+          </Reveal>
+        </section>
+      </div>
+
+      {/* ══ LIGHT ZONE ════════════════════════════════════════════════════════= */}
 
       {/* ── Value props ─────────────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-5xl px-6 py-16">
+      <section className="mx-auto max-w-5xl px-6 py-20">
         <div className="grid gap-10 sm:grid-cols-3">
           {[
             {
@@ -132,7 +124,9 @@ export default function HomePage() {
           ].map((item) => (
             <Reveal key={item.number} delay={item.delay}>
               <div className="space-y-3">
-                <span className="text-xs font-semibold tracking-[0.2em] text-slate-300">{item.number}</span>
+                <span className="text-xs font-semibold tracking-[0.2em] text-slate-300">
+                  {item.number}
+                </span>
                 <p className="text-base font-semibold text-slate-950">{item.title}</p>
                 <p className="text-sm leading-7 text-slate-500">{item.body}</p>
               </div>
@@ -146,7 +140,9 @@ export default function HomePage() {
       {/* ── How it works ────────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-5xl px-6 py-16">
         <Reveal>
-          <Label>How it works</Label>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+            How it works
+          </p>
         </Reveal>
         <div className="mt-8 grid gap-8 sm:grid-cols-3">
           {[
@@ -190,14 +186,15 @@ export default function HomePage() {
       <section className="mx-auto max-w-5xl px-6 py-20">
         <Reveal>
           <div className="rounded-2xl bg-slate-950 px-10 py-12 text-center sm:px-16">
-            <Label light>
-              <span className="text-slate-500">Career Agent</span>
-            </Label>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+              Career Agent
+            </p>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
               Stop applying blindly.
             </h2>
             <p className="mt-4 text-sm leading-7 text-slate-400">
-              Senior engineers who know their exact fit close faster.<br />
+              Senior engineers who know their exact fit close faster.
+              <br />
               Build yours today.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
@@ -222,7 +219,9 @@ export default function HomePage() {
       <footer className="mx-auto max-w-5xl px-6 py-8">
         <Divider />
         <div className="mt-6 flex items-center justify-between">
-          <span className="text-xs font-medium uppercase tracking-[0.2em] text-slate-400">Career Agent</span>
+          <span className="text-xs font-medium uppercase tracking-[0.2em] text-slate-400">
+            Career Agent
+          </span>
           <span className="text-xs text-slate-400">UAE-first career intelligence</span>
         </div>
       </footer>
