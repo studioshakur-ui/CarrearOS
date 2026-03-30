@@ -26,7 +26,7 @@ export function NavLinks() {
               "block rounded px-3 py-2 text-[13px] font-medium transition-colors",
               isActive
                 ? "bg-white/[0.08] text-white/80"
-                : "text-white/28 hover:bg-white/[0.04] hover:text-white/55",
+                : "text-white/40 hover:bg-white/[0.05] hover:text-white/65",
             )}
           >
             {label}

@@ -61,8 +61,8 @@ function AiAnalysisPanel({ match, action }: { match: MatchData; action: ActionDa
     <div className="space-y-10">
 
       {/* ── Decision ─────────────────────────────────────────────────────── */}
-      <div className="bg-[#0c0c0c] rounded-xl px-10 py-8">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/25 mb-4">
+      <div className="bg-[#0c0c0c] rounded-xl px-10 py-9">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/25 mb-5">
           Recommendation
         </p>
         <div className="flex items-baseline gap-5">
@@ -71,19 +71,19 @@ function AiAnalysisPanel({ match, action }: { match: MatchData; action: ActionDa
           <span className="text-4xl font-semibold tabular-nums text-white/80">{match.score}%</span>
         </div>
         {action.rationale && (
-          <p className="mt-4 text-sm leading-7 text-white/45 max-w-xl">{action.rationale}</p>
+          <p className="mt-5 text-sm leading-7 text-white/40">{action.rationale}</p>
         )}
       </div>
 
       {/* ── Strengths & Gaps ─────────────────────────────────────────────── */}
       {(match.strengths.length > 0 || match.gaps.length > 0) && (
-        <div className="grid gap-10 sm:grid-cols-2">
+        <div className="grid gap-10 grid-cols-2">
           {match.strengths.length > 0 && (
             <div>
               <SectionTitle>Strengths</SectionTitle>
-              <ul className="space-y-3">
+              <ul className="space-y-4">
                 {match.strengths.map((s) => (
-                  <li key={s} className="flex gap-3 text-sm leading-6 text-[#1a1916]">
+                  <li key={s} className="flex gap-3 text-sm leading-6 text-[#3a3835]">
                     <span className="mt-0.5 shrink-0 text-[#8b7355]">—</span>
                     {s}
                   </li>
@@ -94,9 +94,9 @@ function AiAnalysisPanel({ match, action }: { match: MatchData; action: ActionDa
           {match.gaps.length > 0 && (
             <div>
               <SectionTitle>Gaps</SectionTitle>
-              <ul className="space-y-3">
+              <ul className="space-y-4">
                 {match.gaps.map((g) => (
-                  <li key={g} className="flex gap-3 text-sm leading-6 text-[#1a1916]">
+                  <li key={g} className="flex gap-3 text-sm leading-6 text-[#3a3835]">
                     <span className="mt-0.5 shrink-0 text-[#9e9b95]">—</span>
                     {g}
                   </li>
@@ -113,7 +113,7 @@ function AiAnalysisPanel({ match, action }: { match: MatchData; action: ActionDa
       {(action.cover_note || action.message_draft) && (
         <div>
           <SectionTitle>Message Draft</SectionTitle>
-          <div className="rounded-lg border border-[#e2dfd9] bg-white px-7 py-6">
+          <div className="rounded-lg border border-[#e2dfd9] bg-white px-8 py-7">
             <p className="text-sm leading-8 text-[#3a3835] font-light italic">
               {action.cover_note || action.message_draft}
             </p>
@@ -127,10 +127,10 @@ function AiAnalysisPanel({ match, action }: { match: MatchData; action: ActionDa
           <Divider />
           <div>
             <SectionTitle>Next Steps</SectionTitle>
-            <ol className="space-y-4">
+            <ol className="grid gap-4 sm:grid-cols-2">
               {action.next_steps.map((step, i) => (
-                <li key={i} className="flex items-start gap-5 text-sm leading-6 text-[#1a1916]">
-                  <span className="mt-0.5 shrink-0 w-5 text-right text-[11px] font-semibold tabular-nums text-[#9e9b95]">
+                <li key={i} className="flex items-start gap-4 text-sm leading-6 text-[#1a1916]">
+                  <span className="mt-0.5 shrink-0 text-[11px] font-semibold tabular-nums text-[#9e9b95]">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   {step}
@@ -147,7 +147,7 @@ function AiAnalysisPanel({ match, action }: { match: MatchData; action: ActionDa
           <Divider />
           <div>
             <SectionTitle>CV Improvements</SectionTitle>
-            <ul className="space-y-3">
+            <ul className="grid gap-3 sm:grid-cols-2">
               {action.cv_improvement_points.map((point) => (
                 <li key={point} className="flex gap-3 text-sm leading-6 text-[#1a1916]">
                   <span className="mt-0.5 shrink-0 text-[#9e9b95]">—</span>
@@ -167,39 +167,43 @@ function AiAnalysisPanel({ match, action }: { match: MatchData; action: ActionDa
             <SectionTitle>Tailored CV</SectionTitle>
 
             {action.tailored_cv.summary && (
-              <div className="mb-7">
+              <div className="mb-8">
                 <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-[#9e9b95]">Summary</p>
                 <p className="text-sm leading-8 text-[#3a3835]">{action.tailored_cv.summary}</p>
               </div>
             )}
 
-            {action.tailored_cv.experience.length > 0 && (
-              <div className="mb-7">
-                <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-[#9e9b95]">Key Achievements</p>
-                <ul className="space-y-3">
-                  {action.tailored_cv.experience.map((point) => (
-                    <li key={point} className="flex gap-3 text-sm leading-6 text-[#1a1916]">
-                      <span className="mt-0.5 shrink-0 text-[#9e9b95]">—</span>
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            <div className="grid gap-8 sm:grid-cols-2">
+              {action.tailored_cv.experience.length > 0 && (
+                <div>
+                  <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-[#9e9b95]">Key Achievements</p>
+                  <ul className="space-y-3">
+                    {action.tailored_cv.experience.map((point) => (
+                      <li key={point} className="flex gap-3 text-sm leading-6 text-[#1a1916]">
+                        <span className="mt-0.5 shrink-0 text-[#9e9b95]">—</span>
+                        {point}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-            {action.tailored_cv.skills.length > 0 && (
-              <div className="mb-7">
-                <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-[#9e9b95]">Skills to Highlight</p>
-                <p className="text-sm text-[#1a1916]">{action.tailored_cv.skills.join("  ·  ")}</p>
-              </div>
-            )}
+              <div className="space-y-6">
+                {action.tailored_cv.skills.length > 0 && (
+                  <div>
+                    <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-[#9e9b95]">Skills to Highlight</p>
+                    <p className="text-sm leading-7 text-[#1a1916]">{action.tailored_cv.skills.join("  ·  ")}</p>
+                  </div>
+                )}
 
-            {action.tailored_cv.keywords.length > 0 && (
-              <div>
-                <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-[#9e9b95]">Keywords</p>
-                <p className="text-sm text-[#6a6761]">{action.tailored_cv.keywords.join("  ·  ")}</p>
+                {action.tailored_cv.keywords.length > 0 && (
+                  <div>
+                    <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-[#9e9b95]">Keywords</p>
+                    <p className="text-sm leading-7 text-[#6a6761]">{action.tailored_cv.keywords.join("  ·  ")}</p>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </>
       )}
@@ -263,7 +267,7 @@ export default async function JobDetailPage({ params }: Props) {
   const hasSalary = job.salary_min || job.salary_max;
 
   return (
-    <div className="max-w-3xl">
+    <div>
 
       {/* ── Back ────────────────────────────────────────────────────────── */}
       <Link href="/app/jobs" className="inline-flex items-center gap-2 text-[13px] text-[#9e9b95] transition hover:text-[#1a1916]">
@@ -271,7 +275,7 @@ export default async function JobDetailPage({ params }: Props) {
       </Link>
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="mt-8 mb-10">
+      <div className="mt-8 mb-10 border-b border-[#e2dfd9] pb-8">
         <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#9e9b95]">{job.company}</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#1a1916]">{job.title}</h1>
         <p className="mt-3 text-sm text-[#6a6761]">
@@ -287,67 +291,77 @@ export default async function JobDetailPage({ params }: Props) {
         </p>
       </div>
 
-      {/* ── AI analysis ─────────────────────────────────────────────────── */}
-      {hasAiAnalysis && matchData && actionData ? (
-        <AiAnalysisPanel match={matchData} action={actionData} />
-      ) : (
-        <div className="rounded-xl border border-[#e2dfd9] bg-white px-8 py-7">
-          {hasAiProfile ? (
-            <div className="space-y-5">
-              <div className="flex items-baseline gap-4">
-                <span className="text-4xl font-semibold tabular-nums text-[#1a1916]">
-                  {basicMatch.score}<span className="text-lg font-normal text-[#9e9b95]">%</span>
-                </span>
-                <span className="text-sm text-[#9e9b95]">skill match</span>
-              </div>
-              {basicMatch.matched.length > 0 && (
-                <p className="text-sm text-[#6a6761]">
-                  <span className="font-medium text-[#1a1916]">Matching:</span>{" "}
-                  {basicMatch.matched.join(", ")}
-                </p>
-              )}
-              {basicMatch.missing.length > 0 && (
-                <p className="text-sm text-[#6a6761]">
-                  <span className="font-medium text-[#1a1916]">Missing:</span>{" "}
-                  {basicMatch.missing.join(", ")}
-                </p>
-              )}
-              <p className="text-xs text-[#9e9b95]">
-                Basic skill match only. Run a full analysis for detailed guidance.
-              </p>
-              <AnalyseJobButton jobId={job.id} />
-            </div>
+      {/* ── 2-col grid ──────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12 items-start">
+
+        {/* ── Left — AI analysis ──────────────────────────────────────── */}
+        <div>
+          {hasAiAnalysis && matchData && actionData ? (
+            <AiAnalysisPanel match={matchData} action={actionData} />
           ) : (
-            <p className="text-sm text-[#6a6761]">
-              <Link href="/app/profile" className="font-medium text-[#1a1916] underline underline-offset-4">
-                Build your AI profile
-              </Link>
-              {" "}to analyse this role.
-            </p>
+            <div className="rounded-xl border border-[#e2dfd9] bg-white px-8 py-7">
+              {hasAiProfile ? (
+                <div className="space-y-5">
+                  <div className="flex items-baseline gap-4">
+                    <span className="text-4xl font-semibold tabular-nums text-[#1a1916]">
+                      {basicMatch.score}<span className="text-lg font-normal text-[#9e9b95]">%</span>
+                    </span>
+                    <span className="text-sm text-[#9e9b95]">skill match</span>
+                  </div>
+                  {basicMatch.matched.length > 0 && (
+                    <p className="text-sm text-[#6a6761]">
+                      <span className="font-medium text-[#1a1916]">Matching:</span>{" "}
+                      {basicMatch.matched.join(", ")}
+                    </p>
+                  )}
+                  {basicMatch.missing.length > 0 && (
+                    <p className="text-sm text-[#6a6761]">
+                      <span className="font-medium text-[#1a1916]">Missing:</span>{" "}
+                      {basicMatch.missing.join(", ")}
+                    </p>
+                  )}
+                  <p className="text-xs text-[#9e9b95]">
+                    Basic skill match only. Run a full analysis for detailed guidance.
+                  </p>
+                  <AnalyseJobButton jobId={job.id} />
+                </div>
+              ) : (
+                <p className="text-sm text-[#6a6761]">
+                  <Link href="/app/profile" className="font-medium text-[#1a1916] underline underline-offset-4">
+                    Build your AI profile
+                  </Link>
+                  {" "}to analyse this role.
+                </p>
+              )}
+            </div>
           )}
         </div>
-      )}
 
-      {/* ── Description ─────────────────────────────────────────────────── */}
-      <div className="mt-12">
-        <p className="mb-5 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#9e9b95]">About the Role</p>
-        <p className="whitespace-pre-line text-sm leading-8 text-[#3a3835]">{job.description}</p>
-      </div>
+        {/* ── Right — job info + apply (sticky) ───────────────────────── */}
+        <div className="lg:sticky lg:top-10 space-y-8">
 
-      {/* ── Apply ───────────────────────────────────────────────────────── */}
-      {job.apply_url && (
-        <div className="mt-10 border-t border-[#e2dfd9] pt-8">
-          <a
-            href={job.apply_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex h-12 items-center gap-3 rounded-lg bg-[#0c0c0c] px-8 text-sm font-medium text-white/80 transition hover:bg-[#1a1a1a] hover:text-white"
-          >
-            Apply for this role
-            <span className="text-white/30">↗</span>
-          </a>
+          {/* Description */}
+          <div>
+            <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#9e9b95]">About the Role</p>
+            <p className="whitespace-pre-line text-sm leading-8 text-[#3a3835]">{job.description}</p>
+          </div>
+
+          {/* Apply */}
+          {job.apply_url && (
+            <div className="border-t border-[#e2dfd9] pt-7">
+              <a
+                href={job.apply_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-11 w-full items-center justify-center gap-3 rounded-lg bg-[#0c0c0c] px-8 text-sm font-medium text-white/80 transition hover:bg-[#1a1a1a] hover:text-white"
+              >
+                Apply for this role
+                <span className="text-white/30">↗</span>
+              </a>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
