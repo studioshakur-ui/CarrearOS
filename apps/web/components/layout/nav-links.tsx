@@ -18,7 +18,7 @@ export function NavLinks() {
 
   return (
     <nav className="space-y-0.5">
-      <p className="mb-2 px-3 text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+      <p className="mb-2 px-3 text-[9px] font-semibold uppercase tracking-[0.2em] text-white/20">
         Navigation
       </p>
       {navigation.map(({ href, label, icon: Icon }) => {
@@ -28,16 +28,16 @@ export function NavLinks() {
             key={href}
             href={href}
             className={cn(
-              "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all",
+              "group flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-all",
               isActive
-                ? "bg-slate-950 text-white"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                ? "bg-white/10 text-white"
+                : "text-white/40 hover:bg-white/[0.06] hover:text-white/70",
             )}
           >
             <Icon
               className={cn(
                 "h-3.5 w-3.5 shrink-0",
-                isActive ? "text-white" : "text-slate-400 group-hover:text-slate-600",
+                isActive ? "text-white" : "text-white/30 group-hover:text-white/50",
               )}
             />
             <span className="font-medium">{label}</span>

@@ -53,7 +53,7 @@ export default async function ProfilePage() {
   const shouldAutoGenerate = hasCv && !hasAiProfile;
 
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="space-y-8">
 
       {/* ── Page header ─────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">

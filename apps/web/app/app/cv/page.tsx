@@ -45,7 +45,7 @@ export default async function CvPage() {
     : null;
 
   return (
-    <div className="max-w-2xl space-y-8">
+    <div className="space-y-8">
 
       {/* ── Page header ─────────────────────────────────────────────────── */}
       <div>
