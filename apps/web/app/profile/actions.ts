@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { extractPdfText } from "@/lib/cv/extract-text";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -98,6 +99,9 @@ export async function saveOnboardingAction(
 
     const bytes = await cvFile.arrayBuffer();
 
+    // Extract text before uploading — fails gracefully (null = profile-only analysis)
+    const rawText = await extractPdfText(bytes);
+
     const { error: uploadError } = await admin.storage.from("cvs").upload(storagePath, bytes, {
       contentType: "application/pdf",
       upsert: false,
@@ -119,7 +123,8 @@ export async function saveOnboardingAction(
       mime_type: "application/pdf",
       size_bytes: cvFile.size,
       is_primary: true,
-      parsed_text_status: "pending",
+      raw_text: rawText,
+      parsed_text_status: rawText ? "success" : "failed",
     });
 
     if (cvError) {

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { PageIntro } from "@/components/layout/page-intro";
@@ -37,7 +38,7 @@ export default async function ProfilePage() {
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase
       .from("cvs")
-      .select("file_name, created_at")
+      .select("file_name, created_at, parsed_text_status")
       .eq("profile_id", user.id)
       .eq("is_primary", true)
       .maybeSingle(),
@@ -55,105 +56,56 @@ export default async function ProfilePage() {
   const detectedSkills: string[] = Array.isArray(aiProfile?.detected_skills)
     ? (aiProfile.detected_skills as string[])
     : [];
+  const detectedLanguages: string[] = Array.isArray(aiProfile?.detected_languages)
+    ? (aiProfile.detected_languages as string[])
+    : [];
   const strengths: string[] = Array.isArray(aiProfile?.strengths) ? (aiProfile.strengths as string[]) : [];
   const weaknesses: string[] = Array.isArray(aiProfile?.weaknesses) ? (aiProfile.weaknesses as string[]) : [];
   const targetRoles: string[] = Array.isArray(aiProfile?.target_roles) ? (aiProfile.target_roles as string[]) : [];
 
+  // Has the user completed enough of their profile to get useful analysis?
+  const hasProfile = profile?.is_profile_complete ?? false;
+  const hasCv = !!primaryCv;
+  const hasAiProfile = !!aiProfile;
+
+  // Auto-trigger analysis on first load after CV upload (no AI profile yet, but CV exists)
+  const shouldAutoGenerate = hasCv && !hasAiProfile;
+
   return (
     <div className="space-y-6">
-      <PageIntro title="Profile" description="Your candidate profile and AI-generated analysis." />
+      <PageIntro title="Profile" description="Your candidate profile and AI-generated career insights." />
 
-      {/* ── Identity ───────────────────────────────────────────────────────── */}
-      <Section title="Identity">
-        <div className="space-y-2 text-sm text-slate-700">
-          <p>
-            <span className="font-medium">Name:</span>{" "}
-            {profile?.first_name || profile?.last_name ? (
-              `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim()
-            ) : (
-              <span className="text-slate-400">Not set</span>
-            )}
+      {/* ── No CV — primary call to action ─────────────────────────────── */}
+      {!hasCv && (
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-6 py-8 text-center">
+          <p className="text-sm font-medium text-slate-700">Upload your CV to unlock AI-powered insights</p>
+          <p className="mt-1 text-sm text-slate-500">
+            We&apos;ll analyse your skills, experience, and career trajectory automatically.
           </p>
-          <p>
-            <span className="font-medium">Location:</span>{" "}
-            {profile?.city || profile?.country_code ? (
-              `${profile.city ?? ""}, ${profile.country_code ?? ""}`.replace(/^,\s*|,\s*$/, "")
-            ) : (
-              <span className="text-slate-400">Not set</span>
-            )}
-          </p>
-          <p>
-            <span className="font-medium">Experience:</span>{" "}
-            {profile?.experience_level && profile.experience_level !== "unknown" ? (
-              profile.experience_level
-            ) : (
-              <span className="text-slate-400">Not specified</span>
-            )}
-          </p>
-          {languages.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              {languages.map((l) => (
-                <Tag key={l} label={l} />
-              ))}
-            </div>
-          )}
+          <div className="mt-4">
+            <Link
+              href="/app/onboarding"
+              className="inline-flex h-10 items-center rounded-xl bg-slate-900 px-5 text-sm font-medium text-white transition hover:bg-slate-700"
+            >
+              Set up profile &amp; upload CV
+            </Link>
+          </div>
         </div>
-      </Section>
+      )}
 
-      {/* ── Preferences ────────────────────────────────────────────────────── */}
-      <Section title="Job preferences">
-        <div className="space-y-2 text-sm text-slate-700">
-          <p>
-            <span className="font-medium">Remote:</span>{" "}
-            {profile?.remote_preference && profile.remote_preference !== "unknown" ? (
-              profile.remote_preference
-            ) : (
-              <span className="text-slate-400">Not specified</span>
-            )}
-          </p>
-          <p>
-            <span className="font-medium">Mobility:</span>{" "}
-            {profile?.mobility && profile.mobility !== "unknown" ? (
-              profile.mobility
-            ) : (
-              <span className="text-slate-400">Not specified</span>
-            )}
-          </p>
-          {desiredRoles.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              {desiredRoles.map((r) => (
-                <Tag key={r} label={r} />
-              ))}
-            </div>
-          )}
-        </div>
-      </Section>
-
-      {/* ── CV ─────────────────────────────────────────────────────────────── */}
-      <Section title="CV">
-        {primaryCv ? (
-          <p className="text-sm text-slate-700">
-            <span className="font-medium">{primaryCv.file_name}</span>
-            <span className="ml-2 text-xs text-slate-400">
-              Uploaded {new Date(primaryCv.created_at).toLocaleDateString()}
-            </span>
-          </p>
-        ) : (
-          <p className="text-sm text-slate-400">No CV uploaded yet.</p>
-        )}
-      </Section>
-
-      {/* ── AI Profile ─────────────────────────────────────────────────────── */}
-      <Section title="AI profile">
-        {aiProfile ? (
-          <div className="space-y-4 text-sm text-slate-700">
+      {/* ── AI Insights ─────────────────────────────────────────────────── */}
+      <Section title="AI insights">
+        {hasAiProfile ? (
+          <div className="space-y-5 text-sm text-slate-700">
+            {/* Summary */}
             {aiProfile.professional_summary ? (
-              <p className="leading-relaxed">{aiProfile.professional_summary as string}</p>
+              <p className="leading-relaxed text-slate-800">{aiProfile.professional_summary as string}</p>
             ) : null}
 
+            {/* Skills */}
             {detectedSkills.length > 0 && (
               <div>
-                <p className="mb-1.5 text-xs font-medium text-slate-500">Skills</p>
+                <p className="mb-2 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">Skills</p>
                 <div className="flex flex-wrap gap-1.5">
                   {detectedSkills.map((s) => (
                     <Tag key={s} label={s} />
@@ -162,12 +114,33 @@ export default async function ProfilePage() {
               </div>
             )}
 
+            {/* Detected languages */}
+            {detectedLanguages.length > 0 && (
+              <div>
+                <p className="mb-2 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">Languages</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {detectedLanguages.map((l) => (
+                    <Tag key={l} label={l} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Seniority */}
+            {aiProfile.seniority_estimate && aiProfile.seniority_estimate !== "unknown" ? (
+              <div>
+                <p className="mb-2 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">Seniority</p>
+                <p className="capitalize">{aiProfile.seniority_estimate as string}</p>
+              </div>
+            ) : null}
+
+            {/* Strengths */}
             {strengths.length > 0 && (
               <div>
-                <p className="mb-1.5 text-xs font-medium text-slate-500">Strengths</p>
-                <ul className="space-y-0.5 pl-4 text-xs text-slate-600">
+                <p className="mb-2 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">Strengths</p>
+                <ul className="space-y-1 pl-4">
                   {strengths.map((s) => (
-                    <li key={s} className="list-disc">
+                    <li key={s} className="list-disc text-xs text-slate-600">
                       {s}
                     </li>
                   ))}
@@ -175,12 +148,13 @@ export default async function ProfilePage() {
               </div>
             )}
 
+            {/* Weaknesses / areas to develop */}
             {weaknesses.length > 0 && (
               <div>
-                <p className="mb-1.5 text-xs font-medium text-slate-500">Areas to develop</p>
-                <ul className="space-y-0.5 pl-4 text-xs text-slate-600">
+                <p className="mb-2 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">Areas to develop</p>
+                <ul className="space-y-1 pl-4">
                   {weaknesses.map((w) => (
-                    <li key={w} className="list-disc">
+                    <li key={w} className="list-disc text-xs text-slate-600">
                       {w}
                     </li>
                   ))}
@@ -188,9 +162,10 @@ export default async function ProfilePage() {
               </div>
             )}
 
+            {/* Target roles */}
             {targetRoles.length > 0 && (
               <div>
-                <p className="mb-1.5 text-xs font-medium text-slate-500">Target roles</p>
+                <p className="mb-2 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">Target roles</p>
                 <div className="flex flex-wrap gap-1.5">
                   {targetRoles.map((r) => (
                     <Tag key={r} label={r} />
@@ -199,21 +174,106 @@ export default async function ProfilePage() {
               </div>
             )}
 
-            <p className="text-xs text-slate-400">
-              Confidence: {Math.round(Number(aiProfile.confidence_score) * 100)}% · {aiProfile.model_name as string} ·{" "}
+            {/* Footer: confidence + model + date */}
+            <p className="border-t border-slate-100 pt-3 text-xs text-slate-400">
+              Confidence: {Math.round(Number(aiProfile.confidence_score) * 100)}% &middot;{" "}
+              {aiProfile.model_name as string} &middot;{" "}
               {new Date(aiProfile.created_at as string).toLocaleDateString()}
             </p>
+
+            {/* Re-generate option */}
+            <GenerateAiProfileButton />
+          </div>
+        ) : hasCv ? (
+          <div className="space-y-4">
+            <p className="text-sm text-slate-500">
+              {shouldAutoGenerate
+                ? "Starting analysis of your CV and profile…"
+                : "Your CV is ready. Generate your AI profile to see insights."}
+            </p>
+            <GenerateAiProfileButton autoGenerate={shouldAutoGenerate} />
           </div>
         ) : (
-          <p className="mb-4 text-sm text-slate-400">
-            {primaryCv
-              ? "No AI profile generated yet. Click below to analyse your profile."
-              : "Upload a CV first to generate an AI profile."}
-          </p>
+          <p className="text-sm text-slate-400">Upload your CV to unlock AI-powered career insights.</p>
         )}
-
-        {primaryCv ? <GenerateAiProfileButton /> : null}
       </Section>
+
+      {/* ── Identity ────────────────────────────────────────────────────── */}
+      {hasProfile && (
+        <Section title="Identity">
+          <div className="space-y-2 text-sm text-slate-700">
+            <p>
+              <span className="font-medium">Name:</span>{" "}
+              {profile?.first_name || profile?.last_name ? (
+                `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim()
+              ) : (
+                <span className="text-slate-400">Not set</span>
+              )}
+            </p>
+            <p>
+              <span className="font-medium">Location:</span>{" "}
+              {profile?.city || profile?.country_code ? (
+                `${profile.city ?? ""}, ${profile.country_code ?? ""}`.replace(/^,\s*|,\s*$/, "")
+              ) : (
+                <span className="text-slate-400">Not set</span>
+              )}
+            </p>
+            <p>
+              <span className="font-medium">Experience:</span>{" "}
+              {profile?.experience_level && profile.experience_level !== "unknown" ? (
+                <span className="capitalize">{profile.experience_level}</span>
+              ) : (
+                <span className="text-slate-400">Not specified</span>
+              )}
+            </p>
+            {languages.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {languages.map((l) => (
+                  <Tag key={l} label={l} />
+                ))}
+              </div>
+            )}
+          </div>
+        </Section>
+      )}
+
+      {/* ── Job preferences ─────────────────────────────────────────────── */}
+      {hasProfile && (
+        <Section title="Job preferences">
+          <div className="space-y-2 text-sm text-slate-700">
+            <p>
+              <span className="font-medium">Remote:</span>{" "}
+              {profile?.remote_preference && profile.remote_preference !== "unknown" ? (
+                <span className="capitalize">{profile.remote_preference}</span>
+              ) : (
+                <span className="text-slate-400">Not specified</span>
+              )}
+            </p>
+            <p>
+              <span className="font-medium">Mobility:</span>{" "}
+              {profile?.mobility && profile.mobility !== "unknown" ? (
+                <span className="capitalize">{profile.mobility.replace(/_/g, " ")}</span>
+              ) : (
+                <span className="text-slate-400">Not specified</span>
+              )}
+            </p>
+            {desiredRoles.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {desiredRoles.map((r) => (
+                  <Tag key={r} label={r} />
+                ))}
+              </div>
+            )}
+          </div>
+        </Section>
+      )}
+
+      {/* ── Edit profile link ────────────────────────────────────────────── */}
+      <div className="text-right">
+        <Link href="/app/onboarding" className="text-xs text-slate-400 transition hover:text-slate-700">
+          Edit profile &rarr;
+        </Link>
+      </div>
     </div>
   );
 }
