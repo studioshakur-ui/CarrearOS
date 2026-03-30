@@ -24,7 +24,8 @@
       "Bash(netstat -ano)",
       "Bash(powershell -Command \"Stop-Process -Id 29036 -Force; Stop-Process -Id 28764 -Force\")",
       "Bash(curl -s http://localhost:3000/ -D -)",
-      "Bash(curl -s \"http://localhost:3000/_next/static/css/app/layout.css\")"
+      "Bash(curl -s \"http://localhost:3000/_next/static/css/app/layout.css\")",
+      "Bash(powershell -Command \"Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force\")"
     ]
   }
 }
