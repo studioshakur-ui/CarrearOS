@@ -17,7 +17,7 @@ const recommendationStyles = {
   maybe: {
     card: "border-amber-200 bg-amber-50",
     badge: "bg-amber-500 text-white",
-    label: "Maybe",
+    label: "Consider",
   },
   skip: {
     card: "border-red-200 bg-red-50",
@@ -28,11 +28,12 @@ const recommendationStyles = {
 
 // ─── Small UI primitives ──────────────────────────────────────────────────────
 
-function Tag({ label, variant }: { label: string; variant: "green" | "amber" | "slate" }) {
+function Tag({ label, variant }: { label: string; variant: "green" | "amber" | "slate" | "blue" }) {
   const styles = {
     green: "border-emerald-200 bg-emerald-50 text-emerald-700",
     amber: "border-amber-200 bg-amber-50 text-amber-700",
     slate: "border-slate-200 bg-white text-slate-600",
+    blue: "border-blue-200 bg-blue-50 text-blue-700",
   };
   return (
     <span className={`inline-block rounded-full border px-2.5 py-0.5 text-xs ${styles[variant]}`}>{label}</span>
@@ -43,7 +44,20 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   return <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{children}</p>;
 }
 
-// ─── AI Analysis display ──────────────────────────────────────────────────────
+function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`rounded-2xl border border-slate-100 bg-white p-5 ${className}`}>{children}</div>
+  );
+}
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type TailoredCv = {
+  summary: string;
+  experience: string[];
+  skills: string[];
+  keywords: string[];
+};
 
 type MatchData = {
   score: number;
@@ -60,117 +74,172 @@ type ActionData = {
   message_draft: string;
   cover_note: string;
   cv_improvement_points: string[];
+  tailored_cv: TailoredCv | null;
 };
 
-function AiAnalysisPanel({ match, action }: { match: MatchData; action: ActionData }) {
-  const rec = recommendationStyles[match.recommendation];
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
+function FitCard({ match, rationale }: { match: MatchData; rationale: string }) {
+  const rec = recommendationStyles[match.recommendation];
+  return (
+    <div className={`rounded-2xl border p-5 ${rec.card}`}>
+      <div className="flex flex-wrap items-center gap-3">
+        <span className={`rounded-full px-4 py-1.5 text-sm font-semibold ${rec.badge}`}>{rec.label}</span>
+        <span className="text-2xl font-semibold text-slate-900">{match.score}%</span>
+        <span className="text-sm text-slate-500">{rationale}</span>
+      </div>
+
+      {match.strengths.length > 0 && (
+        <div className="mt-4">
+          <SectionLabel>Strengths</SectionLabel>
+          <ul className="space-y-1">
+            {match.strengths.map((s) => (
+              <li key={s} className="flex gap-2 text-sm text-slate-700">
+                <span className="mt-0.5 text-emerald-500">✓</span>
+                {s}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {match.gaps.length > 0 && (
+        <div className="mt-4">
+          <SectionLabel>Gaps</SectionLabel>
+          <ul className="space-y-1">
+            {match.gaps.map((g) => (
+              <li key={g} className="flex gap-2 text-sm text-slate-700">
+                <span className="mt-0.5 text-amber-500">△</span>
+                {g}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {match.reasons.length > 0 && (
+        <div className="mt-4">
+          <SectionLabel>Why this score</SectionLabel>
+          <ul className="space-y-1 pl-4">
+            {match.reasons.map((r) => (
+              <li key={r} className="list-disc text-sm text-slate-600">
+                {r}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MessageCard({ message, label }: { message: string; label: string }) {
+  return (
+    <Card>
+      <SectionLabel>{label}</SectionLabel>
+      <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-relaxed text-slate-700 italic">
+        {message}
+      </p>
+    </Card>
+  );
+}
+
+function ChecklistCard({ steps }: { steps: string[] }) {
+  return (
+    <Card>
+      <SectionLabel>Application checklist</SectionLabel>
+      <ol className="space-y-2">
+        {steps.map((step, i) => (
+          <li key={i} className="flex items-start gap-3 text-sm text-slate-700">
+            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border border-slate-300 text-xs font-semibold text-slate-400">
+              {i + 1}
+            </span>
+            {step}
+          </li>
+        ))}
+      </ol>
+    </Card>
+  );
+}
+
+function OptimizedCvCard({ cv }: { cv: TailoredCv }) {
+  return (
+    <Card>
+      <SectionLabel>Optimized CV</SectionLabel>
+      <p className="mb-1 text-xs text-slate-400">Tailored to this role — review before using</p>
+
+      {cv.summary && (
+        <div className="mt-3">
+          <p className="mb-1 text-xs font-medium text-slate-500">Summary</p>
+          <p className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm leading-relaxed text-slate-700">
+            {cv.summary}
+          </p>
+        </div>
+      )}
+
+      {cv.experience.length > 0 && (
+        <div className="mt-4">
+          <p className="mb-2 text-xs font-medium text-slate-500">Key achievements</p>
+          <ul className="space-y-1.5 pl-4">
+            {cv.experience.map((point) => (
+              <li key={point} className="list-disc text-sm text-slate-700">
+                {point}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {cv.skills.length > 0 && (
+        <div className="mt-4">
+          <p className="mb-2 text-xs font-medium text-slate-500">Skills to highlight</p>
+          <div className="flex flex-wrap gap-1.5">
+            {cv.skills.map((s) => (
+              <Tag key={s} label={s} variant="green" />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {cv.keywords.length > 0 && (
+        <div className="mt-4">
+          <p className="mb-2 text-xs font-medium text-slate-500">Keywords to include</p>
+          <div className="flex flex-wrap gap-1.5">
+            {cv.keywords.map((k) => (
+              <Tag key={k} label={k} variant="blue" />
+            ))}
+          </div>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function AiAnalysisPanel({ match, action }: { match: MatchData; action: ActionData }) {
   return (
     <div className="space-y-4">
-      {/* Recommendation + score */}
-      <div className={`rounded-2xl border p-5 ${rec.card}`}>
-        <div className="flex flex-wrap items-center gap-3">
-          <span className={`rounded-full px-4 py-1.5 text-sm font-semibold ${rec.badge}`}>{rec.label}</span>
-          <span className="text-2xl font-semibold text-slate-900">{match.score}%</span>
-          <span className="text-sm text-slate-500">{action.rationale}</span>
-        </div>
+      <FitCard match={match} rationale={action.rationale} />
 
-        {/* Strengths */}
-        {match.strengths.length > 0 && (
-          <div className="mt-4">
-            <SectionLabel>Strengths</SectionLabel>
-            <ul className="space-y-1">
-              {match.strengths.map((s) => (
-                <li key={s} className="flex gap-2 text-sm text-slate-700">
-                  <span className="mt-0.5 text-emerald-500">✓</span>
-                  {s}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+      {action.cover_note && <MessageCard message={action.cover_note} label="Cover note" />}
 
-        {/* Gaps */}
-        {match.gaps.length > 0 && (
-          <div className="mt-4">
-            <SectionLabel>Gaps</SectionLabel>
-            <ul className="space-y-1">
-              {match.gaps.map((g) => (
-                <li key={g} className="flex gap-2 text-sm text-slate-700">
-                  <span className="mt-0.5 text-amber-500">△</span>
-                  {g}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+      {action.message_draft && <MessageCard message={action.message_draft} label="Ready-to-send message" />}
 
-        {/* Reasons */}
-        {match.reasons.length > 0 && (
-          <div className="mt-4">
-            <SectionLabel>Why this score</SectionLabel>
-            <ul className="space-y-1 pl-4">
-              {match.reasons.map((r) => (
-                <li key={r} className="list-disc text-sm text-slate-600">
-                  {r}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
+      {action.next_steps.length > 0 && <ChecklistCard steps={action.next_steps} />}
 
-      {/* Action guidance */}
-      <div className="rounded-2xl border border-slate-100 bg-white p-5 space-y-4">
-        {/* Next steps */}
-        {action.next_steps.length > 0 && (
-          <div>
-            <SectionLabel>Next steps</SectionLabel>
-            <ol className="space-y-1.5">
-              {action.next_steps.map((step, i) => (
-                <li key={i} className="flex gap-2.5 text-sm text-slate-700">
-                  <span className="shrink-0 font-semibold text-slate-400">{i + 1}.</span>
-                  {step}
-                </li>
-              ))}
-            </ol>
-          </div>
-        )}
+      {action.tailored_cv && <OptimizedCvCard cv={action.tailored_cv} />}
 
-        {/* Message draft */}
-        {action.message_draft && (
-          <div>
-            <SectionLabel>Message draft</SectionLabel>
-            <p className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm leading-relaxed text-slate-700 italic">
-              {action.message_draft}
-            </p>
-          </div>
-        )}
-
-        {/* Cover note */}
-        {action.cover_note && (
-          <div>
-            <SectionLabel>Cover note</SectionLabel>
-            <p className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm leading-relaxed text-slate-700 italic">
-              {action.cover_note}
-            </p>
-          </div>
-        )}
-
-        {/* CV improvements */}
-        {action.cv_improvement_points.length > 0 && (
-          <div>
-            <SectionLabel>CV improvements</SectionLabel>
-            <ul className="space-y-1 pl-4">
-              {action.cv_improvement_points.map((point) => (
-                <li key={point} className="list-disc text-sm text-slate-600">
-                  {point}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
+      {action.cv_improvement_points.length > 0 && (
+        <Card>
+          <SectionLabel>CV improvements</SectionLabel>
+          <ul className="space-y-1 pl-4">
+            {action.cv_improvement_points.map((point) => (
+              <li key={point} className="list-disc text-sm text-slate-600">
+                {point}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
     </div>
   );
 }
@@ -216,7 +285,9 @@ export default async function JobDetailPage({ params }: Props) {
         .maybeSingle(),
       supabase
         .from("ai_actions")
-        .select("id, should_apply, rationale, next_steps, message_draft, cover_note, cv_improvement_points")
+        .select(
+          "id, should_apply, rationale, next_steps, message_draft, cover_note, cv_improvement_points, tailored_cv",
+        )
         .eq("profile_id", user.id)
         .eq("job_id", id)
         .maybeSingle(),
@@ -224,17 +295,14 @@ export default async function JobDetailPage({ params }: Props) {
 
   if (!job) notFound();
 
-  // Phase 3 basic match — used as fallback when AI analysis is unavailable
   const userSkills = Array.isArray(aiProfile?.detected_skills) ? (aiProfile.detected_skills as string[]) : [];
   const jobSkills = Array.isArray(job.required_skills) ? (job.required_skills as string[]) : [];
   const basicMatch = computeMatch(userSkills, jobSkills);
 
   const hasAiAnalysis = !!existingMatch && !!existingAction;
   const hasAiProfile = !!aiProfile;
-
   const hasSalary = job.salary_min || job.salary_max;
 
-  // Type-narrow AI analysis data
   const matchData: MatchData | null = existingMatch
     ? {
         score: existingMatch.score as number,
@@ -244,6 +312,17 @@ export default async function JobDetailPage({ params }: Props) {
         recommendation: existingMatch.recommendation as "apply" | "maybe" | "skip",
       }
     : null;
+
+  const rawTailoredCv = existingAction?.tailored_cv as Record<string, unknown> | null | undefined;
+  const tailoredCv: TailoredCv | null =
+    rawTailoredCv && typeof rawTailoredCv === "object"
+      ? {
+          summary: typeof rawTailoredCv.summary === "string" ? rawTailoredCv.summary : "",
+          experience: Array.isArray(rawTailoredCv.experience) ? (rawTailoredCv.experience as string[]) : [],
+          skills: Array.isArray(rawTailoredCv.skills) ? (rawTailoredCv.skills as string[]) : [],
+          keywords: Array.isArray(rawTailoredCv.keywords) ? (rawTailoredCv.keywords as string[]) : [],
+        }
+      : null;
 
   const actionData: ActionData | null = existingAction
     ? {
@@ -255,6 +334,7 @@ export default async function JobDetailPage({ params }: Props) {
         cv_improvement_points: Array.isArray(existingAction.cv_improvement_points)
           ? (existingAction.cv_improvement_points as string[])
           : [],
+        tailored_cv: tailoredCv,
       }
     : null;
 
@@ -301,20 +381,18 @@ export default async function JobDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* ── AI Analysis (Phase 4) ────────────────────────────────────────────── */}
+      {/* ── Analysis ────────────────────────────────────────────────────────────── */}
       {hasAiAnalysis && matchData && actionData ? (
         <AiAnalysisPanel match={matchData} action={actionData} />
       ) : (
         <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-5">
           {hasAiProfile ? (
             <div className="space-y-3">
-              {/* Phase 3 fallback score while AI analysis not yet generated */}
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-semibold text-slate-900">{basicMatch.score}%</span>
                 <span className="text-sm text-slate-500">{basicMatch.label}</span>
               </div>
 
-              {/* Skill breakdown */}
               {jobSkills.length > 0 && (
                 <div className="space-y-2">
                   {basicMatch.matched.length > 0 && (
@@ -350,15 +428,13 @@ export default async function JobDetailPage({ params }: Props) {
               <AnalyseJobButton jobId={job.id} />
             </div>
           ) : (
-            <div className="space-y-2 text-sm text-slate-500">
-              <p>
-                Generate your{" "}
-                <Link href="/app/profile" className="font-medium text-slate-800 underline underline-offset-2">
-                  AI profile
-                </Link>{" "}
-                first, then come back to analyse this job.
-              </p>
-            </div>
+            <p className="text-sm text-slate-500">
+              Generate your{" "}
+              <Link href="/app/profile" className="font-medium text-slate-800 underline underline-offset-2">
+                AI profile
+              </Link>{" "}
+              first, then come back to analyse this job.
+            </p>
           )}
         </div>
       )}
