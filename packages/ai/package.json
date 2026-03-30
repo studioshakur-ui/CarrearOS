@@ -1,0 +1,6 @@
+{
+  "name": "@career-agent/ai",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts"
+}

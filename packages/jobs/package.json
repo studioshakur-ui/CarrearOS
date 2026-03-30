@@ -1,0 +1,6 @@
+{
+  "name": "@career-agent/jobs",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts"
+}
