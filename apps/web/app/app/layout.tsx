@@ -18,7 +18,7 @@ export default async function AuthenticatedLayout({ children }: { children: Reac
     <AppShell
       eyebrow="Workspace"
       title="Career Command Center"
-      description="A restrained application shell for onboarding, jobs, profile, and CV management. Business workflows will be layered in later."
+      description="Manage your profile, review opportunities, and get AI-powered career guidance tailored to the Gulf market."
       userEmail={user.email}
       logoutAction={logoutAction}
     >
