@@ -31,6 +31,27 @@ function MetaTag({ label }: { label: string }) {
   );
 }
 
+function MatchedSkillPreview({ skills }: { skills: string[] }) {
+  if (skills.length === 0) return null;
+  const preview = skills.slice(0, 3);
+  const remaining = skills.length - preview.length;
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      {preview.map((s) => (
+        <span
+          key={s}
+          className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700"
+        >
+          {s}
+        </span>
+      ))}
+      {remaining > 0 && (
+        <span className="text-xs text-slate-400">+{remaining} more</span>
+      )}
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function JobsPage() {
@@ -122,6 +143,12 @@ export default async function JobsPage() {
                   <MetaTag label={job.remote_type} />
                 )}
               </div>
+
+              {job.match.matched.length > 0 && (
+                <div className="mt-2">
+                  <MatchedSkillPreview skills={job.match.matched} />
+                </div>
+              )}
             </Link>
           ))}
         </div>

@@ -7,6 +7,11 @@ export type MatchResult = {
   missing: string[]; // job skills the user is missing
 };
 
+/** Normalize a skill string: lowercase, trim, collapse internal whitespace. */
+function normalize(skill: string): string {
+  return skill.toLowerCase().trim().replace(/\s+/g, " ");
+}
+
 /**
  * Deterministic match between a user's detected skills and a job's required skills.
  *
@@ -19,13 +24,13 @@ export function computeMatch(userSkills: string[], jobRequiredSkills: string[]):
     return { score: 0, label: "Low fit", matched: [], missing: jobRequiredSkills };
   }
 
-  const userSet = new Set(userSkills.map((s) => s.toLowerCase()));
+  const userSet = new Set(userSkills.map(normalize));
 
   const matched: string[] = [];
   const missing: string[] = [];
 
   for (const skill of jobRequiredSkills) {
-    if (userSet.has(skill.toLowerCase())) {
+    if (userSet.has(normalize(skill))) {
       matched.push(skill);
     } else {
       missing.push(skill);
