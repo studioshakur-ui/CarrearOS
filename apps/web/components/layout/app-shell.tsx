@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
 import { NavLinks } from "@/components/layout/nav-links";
 
 type AppShellProps = {
@@ -12,50 +11,52 @@ type AppShellProps = {
   children: React.ReactNode;
 };
 
-export function AppShell({ title, eyebrow, description, userEmail, logoutAction, children }: AppShellProps) {
+export function AppShell({ userEmail, logoutAction, children }: AppShellProps) {
   return (
-    <div className="min-h-screen bg-transparent">
-      <div className="mx-auto flex min-h-screen max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:px-8">
-        <aside className="hidden w-72 shrink-0 rounded-3xl border border-white/70 bg-white/75 p-5 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.35)] backdrop-blur md:flex md:flex-col">
-          <Link href="/" className="rounded-2xl px-3 py-2">
-            <div className="text-xs font-medium uppercase tracking-[0.22em] text-slate-500">Career Agent</div>
-            <div className="mt-2 text-lg font-semibold text-slate-900">Premium Career Copilot</div>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              Gulf-first guidance for focused job search, profile management, and CV readiness.
-            </p>
-          </Link>
+    <div className="min-h-screen bg-slate-50">
+      <div className="mx-auto flex min-h-screen max-w-7xl gap-0 lg:gap-6 px-0 lg:px-6 py-0 lg:py-6">
 
-          <NavLinks />
+        {/* ── Sidebar ──────────────────────────────────────────────────────── */}
+        <aside className="hidden w-60 shrink-0 lg:flex lg:flex-col">
+          <div className="flex h-full flex-col rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+
+            {/* Logo */}
+            <div className="px-5 pt-6 pb-4 border-b border-slate-100">
+              <Link href="/" className="block">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">Career Agent</p>
+                <p className="mt-0.5 text-sm font-semibold text-slate-900">Gulf Career Intelligence</p>
+              </Link>
+            </div>
+
+            {/* Nav */}
+            <div className="flex-1 overflow-y-auto px-3 py-4">
+              <NavLinks />
+            </div>
+
+            {/* User footer */}
+            <div className="border-t border-slate-100 px-4 py-4">
+              <p className="truncate text-[11px] text-slate-500">{userEmail}</p>
+              {logoutAction && (
+                <form action={logoutAction} className="mt-2">
+                  <button
+                    type="submit"
+                    className="text-[11px] font-medium text-slate-400 transition hover:text-slate-700"
+                  >
+                    Sign out
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
         </aside>
 
-        <div className="flex min-h-screen flex-1 flex-col">
-          <header className="rounded-3xl border border-white/70 bg-white/80 px-6 py-5 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.35)] backdrop-blur">
-            <div className="text-xs font-medium uppercase tracking-[0.24em] text-slate-500">{eyebrow}</div>
-            <div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <h1 className="text-2xl font-semibold tracking-tight text-slate-950">{title}</h1>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">{description}</p>
-              </div>
-              <div className="flex flex-col items-start gap-3 lg:items-end">
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-right">
-                  <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Session</div>
-                  <div className="mt-1 text-sm font-medium text-slate-800">{userEmail ?? "Authenticated user"}</div>
-                </div>
-                {logoutAction ? (
-                  <form action={logoutAction}>
-                    <Button variant="outline" size="sm" type="submit">
-                      Log out
-                    </Button>
-                  </form>
-                ) : null}
-              </div>
-            </div>
-          </header>
-
-          <main className="mt-6 flex-1 rounded-3xl border border-white/70 bg-white p-6 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.35)] sm:p-8">
+        {/* ── Main ─────────────────────────────────────────────────────────── */}
+        <main className="flex-1 overflow-hidden rounded-none lg:rounded-2xl border-0 lg:border border-slate-200/80 bg-white shadow-sm">
+          <div className="h-full overflow-y-auto px-6 py-8 sm:px-8">
             {children}
-          </main>
-        </div>
+          </div>
+        </main>
+
       </div>
     </div>
   );

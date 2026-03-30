@@ -74,21 +74,21 @@ export default async function JobsPage() {
     .sort((a, b) => b.match.score - a.match.score);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-baseline justify-between">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold tracking-tight text-slate-950">UAE Roles</h1>
-          <p className="mt-0.5 text-xs text-slate-400">
+          <p className="mt-0.5 text-xs text-slate-500">
             {jobsWithScores.length} curated positions · sorted by match
           </p>
         </div>
         {!hasAiProfile && (
           <Link
             href="/app/profile"
-            className="text-xs font-medium text-amber-700 underline underline-offset-2"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800 transition hover:bg-amber-100"
           >
-            Generate AI profile to see scores
+            Generate AI profile to see scores →
           </Link>
         )}
       </div>
