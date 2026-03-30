@@ -1,63 +1,9 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, ExternalLink } from "lucide-react";
 
 import { AnalyseJobButton } from "@/components/jobs/analyse-job-button";
 import { computeMatch } from "@/lib/matching/score";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-
-// ─── Style maps ───────────────────────────────────────────────────────────────
-
-const recommendationStyles = {
-  apply: {
-    outer: "border-emerald-200 bg-emerald-50",
-    banner: "bg-emerald-600",
-    word: "Apply",
-    icon: "✓",
-    detail: "text-emerald-800",
-    label: "Apply",
-  },
-  maybe: {
-    outer: "border-amber-200 bg-amber-50",
-    banner: "bg-amber-500",
-    word: "Consider",
-    icon: "△",
-    detail: "text-amber-800",
-    label: "Consider",
-  },
-  skip: {
-    outer: "border-red-200 bg-red-50",
-    banner: "bg-red-500",
-    word: "Pass",
-    icon: "✕",
-    detail: "text-red-800",
-    label: "Skip",
-  },
-} as const;
-
-// ─── Small UI primitives ──────────────────────────────────────────────────────
-
-function Tag({ label, variant }: { label: string; variant: "green" | "amber" | "slate" | "blue" }) {
-  const styles = {
-    green: "border-emerald-200 bg-emerald-50 text-emerald-700",
-    amber: "border-amber-200 bg-amber-50 text-amber-700",
-    slate: "border-slate-200 bg-white text-slate-600",
-    blue: "border-blue-200 bg-blue-50 text-blue-700",
-  };
-  return (
-    <span className={`inline-block rounded-full border px-2.5 py-0.5 text-xs ${styles[variant]}`}>{label}</span>
-  );
-}
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{children}</p>;
-}
-
-function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={`rounded-2xl border border-slate-100 bg-white p-5 ${className}`}>{children}</div>
-  );
-}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -86,173 +32,176 @@ type ActionData = {
   tailored_cv: TailoredCv | null;
 };
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// ─── Primitives ───────────────────────────────────────────────────────────────
 
-function FitCard({ match, rationale }: { match: MatchData; rationale: string }) {
-  const rec = recommendationStyles[match.recommendation];
+function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`overflow-hidden rounded-2xl border ${rec.outer}`}>
-      {/* ── Instant verdict banner ── */}
-      <div className={`flex items-center gap-4 px-6 py-5 ${rec.banner}`}>
-        <span className="text-4xl font-bold tracking-tight text-white">{rec.word}</span>
-        <div className="h-8 w-px bg-white/30" />
-        <span className="text-4xl font-semibold text-white">{match.score}%</span>
-        <p className="ml-1 max-w-sm text-sm leading-snug text-white/80">{rationale}</p>
-      </div>
-
-      {/* ── Details ── */}
-      <div className="divide-y divide-slate-200/60 px-6">
-        {match.strengths.length > 0 && (
-          <div className="py-4">
-            <SectionLabel>Strengths</SectionLabel>
-            <ul className="space-y-1.5">
-              {match.strengths.map((s) => (
-                <li key={s} className="flex gap-2 text-sm text-slate-700">
-                  <span className="mt-0.5 text-emerald-500">✓</span>
-                  {s}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {match.gaps.length > 0 && (
-          <div className="py-4">
-            <SectionLabel>Gaps</SectionLabel>
-            <ul className="space-y-1.5">
-              {match.gaps.map((g) => (
-                <li key={g} className="flex gap-2 text-sm text-slate-700">
-                  <span className="mt-0.5 text-amber-500">△</span>
-                  {g}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {match.reasons.length > 0 && (
-          <div className="py-4">
-            <SectionLabel>Why this score</SectionLabel>
-            <ul className="space-y-1 pl-4">
-              {match.reasons.map((r) => (
-                <li key={r} className="list-disc text-sm text-slate-600">
-                  {r}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-    </div>
+    <p className="mb-5 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#9e9b95]">
+      {children}
+    </p>
   );
 }
 
-function MessageCard({ message, label }: { message: string; label: string }) {
-  return (
-    <Card>
-      <SectionLabel>{label}</SectionLabel>
-      <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-relaxed text-slate-700 italic">
-        {message}
-      </p>
-    </Card>
-  );
+function Divider() {
+  return <div className="border-t border-[#e2dfd9]" />;
 }
 
-function ChecklistCard({ steps }: { steps: string[] }) {
-  return (
-    <Card>
-      <SectionLabel>Application checklist</SectionLabel>
-      <ol className="space-y-2">
-        {steps.map((step, i) => (
-          <li key={i} className="flex items-start gap-3 text-sm text-slate-700">
-            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border border-slate-300 text-xs font-semibold text-slate-400">
-              {i + 1}
-            </span>
-            {step}
-          </li>
-        ))}
-      </ol>
-    </Card>
-  );
-}
+// ─── Analysis panel ───────────────────────────────────────────────────────────
 
-function OptimizedCvCard({ cv }: { cv: TailoredCv }) {
-  return (
-    <Card>
-      <SectionLabel>Optimized CV</SectionLabel>
-      <p className="mb-1 text-xs text-slate-400">Tailored to this role — review before using</p>
-
-      {cv.summary && (
-        <div className="mt-3">
-          <p className="mb-1 text-xs font-medium text-slate-500">Summary</p>
-          <p className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm leading-relaxed text-slate-700">
-            {cv.summary}
-          </p>
-        </div>
-      )}
-
-      {cv.experience.length > 0 && (
-        <div className="mt-4">
-          <p className="mb-2 text-xs font-medium text-slate-500">Key achievements</p>
-          <ul className="space-y-1.5 pl-4">
-            {cv.experience.map((point) => (
-              <li key={point} className="list-disc text-sm text-slate-700">
-                {point}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {cv.skills.length > 0 && (
-        <div className="mt-4">
-          <p className="mb-2 text-xs font-medium text-slate-500">Skills to highlight</p>
-          <div className="flex flex-wrap gap-1.5">
-            {cv.skills.map((s) => (
-              <Tag key={s} label={s} variant="green" />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {cv.keywords.length > 0 && (
-        <div className="mt-4">
-          <p className="mb-2 text-xs font-medium text-slate-500">Keywords to include</p>
-          <div className="flex flex-wrap gap-1.5">
-            {cv.keywords.map((k) => (
-              <Tag key={k} label={k} variant="blue" />
-            ))}
-          </div>
-        </div>
-      )}
-    </Card>
-  );
-}
+const verdictLabel = {
+  apply: "Apply",
+  maybe: "Consider",
+  skip:  "Pass",
+} as const;
 
 function AiAnalysisPanel({ match, action }: { match: MatchData; action: ActionData }) {
+  const verdict = verdictLabel[match.recommendation];
+
   return (
-    <div className="space-y-4">
-      <FitCard match={match} rationale={action.rationale} />
+    <div className="space-y-10">
 
-      {action.cover_note && <MessageCard message={action.cover_note} label="Cover note" />}
+      {/* ── Decision ─────────────────────────────────────────────────────── */}
+      <div className="bg-[#0c0c0c] rounded-xl px-10 py-8">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/25 mb-4">
+          Recommendation
+        </p>
+        <div className="flex items-baseline gap-5">
+          <span className="text-5xl font-semibold tracking-tight text-white">{verdict}</span>
+          <span className="text-4xl font-light text-white/30">·</span>
+          <span className="text-4xl font-semibold tabular-nums text-white/80">{match.score}%</span>
+        </div>
+        {action.rationale && (
+          <p className="mt-4 text-sm leading-7 text-white/45 max-w-xl">{action.rationale}</p>
+        )}
+      </div>
 
-      {action.message_draft && <MessageCard message={action.message_draft} label="Ready-to-send message" />}
+      {/* ── Strengths & Gaps ─────────────────────────────────────────────── */}
+      {(match.strengths.length > 0 || match.gaps.length > 0) && (
+        <div className="grid gap-10 sm:grid-cols-2">
+          {match.strengths.length > 0 && (
+            <div>
+              <SectionTitle>Strengths</SectionTitle>
+              <ul className="space-y-3">
+                {match.strengths.map((s) => (
+                  <li key={s} className="flex gap-3 text-sm leading-6 text-[#1a1916]">
+                    <span className="mt-0.5 shrink-0 text-[#8b7355]">—</span>
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {match.gaps.length > 0 && (
+            <div>
+              <SectionTitle>Gaps</SectionTitle>
+              <ul className="space-y-3">
+                {match.gaps.map((g) => (
+                  <li key={g} className="flex gap-3 text-sm leading-6 text-[#1a1916]">
+                    <span className="mt-0.5 shrink-0 text-[#9e9b95]">—</span>
+                    {g}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
 
-      {action.next_steps.length > 0 && <ChecklistCard steps={action.next_steps} />}
+      <Divider />
 
-      {action.tailored_cv && <OptimizedCvCard cv={action.tailored_cv} />}
+      {/* ── Message draft ────────────────────────────────────────────────── */}
+      {(action.cover_note || action.message_draft) && (
+        <div>
+          <SectionTitle>Message Draft</SectionTitle>
+          <div className="rounded-lg border border-[#e2dfd9] bg-white px-7 py-6">
+            <p className="text-sm leading-8 text-[#3a3835] font-light italic">
+              {action.cover_note || action.message_draft}
+            </p>
+          </div>
+        </div>
+      )}
 
+      {/* ── Next steps ───────────────────────────────────────────────────── */}
+      {action.next_steps.length > 0 && (
+        <>
+          <Divider />
+          <div>
+            <SectionTitle>Next Steps</SectionTitle>
+            <ol className="space-y-4">
+              {action.next_steps.map((step, i) => (
+                <li key={i} className="flex items-start gap-5 text-sm leading-6 text-[#1a1916]">
+                  <span className="mt-0.5 shrink-0 w-5 text-right text-[11px] font-semibold tabular-nums text-[#9e9b95]">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  {step}
+                </li>
+              ))}
+            </ol>
+          </div>
+        </>
+      )}
+
+      {/* ── CV improvements ──────────────────────────────────────────────── */}
       {action.cv_improvement_points.length > 0 && (
-        <Card>
-          <SectionLabel>CV improvements</SectionLabel>
-          <ul className="space-y-1 pl-4">
-            {action.cv_improvement_points.map((point) => (
-              <li key={point} className="list-disc text-sm text-slate-600">
-                {point}
-              </li>
-            ))}
-          </ul>
-        </Card>
+        <>
+          <Divider />
+          <div>
+            <SectionTitle>CV Improvements</SectionTitle>
+            <ul className="space-y-3">
+              {action.cv_improvement_points.map((point) => (
+                <li key={point} className="flex gap-3 text-sm leading-6 text-[#1a1916]">
+                  <span className="mt-0.5 shrink-0 text-[#9e9b95]">—</span>
+                  {point}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </>
+      )}
+
+      {/* ── Tailored CV ──────────────────────────────────────────────────── */}
+      {action.tailored_cv && (
+        <>
+          <Divider />
+          <div>
+            <SectionTitle>Tailored CV</SectionTitle>
+
+            {action.tailored_cv.summary && (
+              <div className="mb-7">
+                <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-[#9e9b95]">Summary</p>
+                <p className="text-sm leading-8 text-[#3a3835]">{action.tailored_cv.summary}</p>
+              </div>
+            )}
+
+            {action.tailored_cv.experience.length > 0 && (
+              <div className="mb-7">
+                <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-[#9e9b95]">Key Achievements</p>
+                <ul className="space-y-3">
+                  {action.tailored_cv.experience.map((point) => (
+                    <li key={point} className="flex gap-3 text-sm leading-6 text-[#1a1916]">
+                      <span className="mt-0.5 shrink-0 text-[#9e9b95]">—</span>
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {action.tailored_cv.skills.length > 0 && (
+              <div className="mb-7">
+                <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-[#9e9b95]">Skills to Highlight</p>
+                <p className="text-sm text-[#1a1916]">{action.tailored_cv.skills.join("  ·  ")}</p>
+              </div>
+            )}
+
+            {action.tailored_cv.keywords.length > 0 && (
+              <div>
+                <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-[#9e9b95]">Keywords</p>
+                <p className="text-sm text-[#6a6761]">{action.tailored_cv.keywords.join("  ·  ")}</p>
+              </div>
+            )}
+          </div>
+        </>
       )}
     </div>
   );
@@ -260,216 +209,144 @@ function AiAnalysisPanel({ match, action }: { match: MatchData; action: ActionDa
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-type Props = {
-  params: Promise<{ id: string }>;
-};
+type Props = { params: Promise<{ id: string }> };
 
 export default async function JobDetailPage({ params }: Props) {
   const { id } = await params;
 
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const [{ data: job }, { data: aiProfile }, { data: existingMatch }, { data: existingAction }] =
     await Promise.all([
-      supabase
-        .from("jobs")
-        .select(
-          "id, title, company, location, remote_type, employment_type, experience_level, description, required_skills, apply_url, salary_min, salary_max, salary_currency",
-        )
-        .eq("id", id)
-        .eq("is_active", true)
-        .single(),
-      supabase
-        .from("ai_profiles")
-        .select("detected_skills")
-        .eq("profile_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-      supabase
-        .from("matches")
-        .select("id, score, strengths, gaps, reasons, recommendation")
-        .eq("profile_id", user.id)
-        .eq("job_id", id)
-        .maybeSingle(),
-      supabase
-        .from("ai_actions")
-        .select(
-          "id, should_apply, rationale, next_steps, message_draft, cover_note, cv_improvement_points, tailored_cv",
-        )
-        .eq("profile_id", user.id)
-        .eq("job_id", id)
-        .maybeSingle(),
+      supabase.from("jobs").select("id, title, company, location, remote_type, employment_type, experience_level, description, required_skills, apply_url, salary_min, salary_max, salary_currency").eq("id", id).eq("is_active", true).single(),
+      supabase.from("ai_profiles").select("detected_skills").eq("profile_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+      supabase.from("matches").select("id, score, strengths, gaps, reasons, recommendation").eq("profile_id", user.id).eq("job_id", id).maybeSingle(),
+      supabase.from("ai_actions").select("id, should_apply, rationale, next_steps, message_draft, cover_note, cv_improvement_points, tailored_cv").eq("profile_id", user.id).eq("job_id", id).maybeSingle(),
     ]);
 
   if (!job) notFound();
 
   const userSkills = Array.isArray(aiProfile?.detected_skills) ? (aiProfile.detected_skills as string[]) : [];
-  const jobSkills = Array.isArray(job.required_skills) ? (job.required_skills as string[]) : [];
+  const jobSkills  = Array.isArray(job.required_skills)        ? (job.required_skills as string[])        : [];
   const basicMatch = computeMatch(userSkills, jobSkills);
-
   const hasAiAnalysis = !!existingMatch && !!existingAction;
-  const hasAiProfile = !!aiProfile;
-  const hasSalary = job.salary_min || job.salary_max;
+  const hasAiProfile  = !!aiProfile;
 
-  const matchData: MatchData | null = existingMatch
-    ? {
-        score: existingMatch.score as number,
-        strengths: Array.isArray(existingMatch.strengths) ? (existingMatch.strengths as string[]) : [],
-        gaps: Array.isArray(existingMatch.gaps) ? (existingMatch.gaps as string[]) : [],
-        reasons: Array.isArray(existingMatch.reasons) ? (existingMatch.reasons as string[]) : [],
-        recommendation: existingMatch.recommendation as "apply" | "maybe" | "skip",
-      }
-    : null;
+  const matchData: MatchData | null = existingMatch ? {
+    score: existingMatch.score as number,
+    strengths: Array.isArray(existingMatch.strengths) ? (existingMatch.strengths as string[]) : [],
+    gaps:      Array.isArray(existingMatch.gaps)      ? (existingMatch.gaps as string[])      : [],
+    reasons:   Array.isArray(existingMatch.reasons)   ? (existingMatch.reasons as string[])   : [],
+    recommendation: existingMatch.recommendation as "apply" | "maybe" | "skip",
+  } : null;
 
   const rawTailoredCv = existingAction?.tailored_cv as Record<string, unknown> | null | undefined;
-  const tailoredCv: TailoredCv | null =
-    rawTailoredCv && typeof rawTailoredCv === "object"
-      ? {
-          summary: typeof rawTailoredCv.summary === "string" ? rawTailoredCv.summary : "",
-          experience: Array.isArray(rawTailoredCv.experience) ? (rawTailoredCv.experience as string[]) : [],
-          skills: Array.isArray(rawTailoredCv.skills) ? (rawTailoredCv.skills as string[]) : [],
-          keywords: Array.isArray(rawTailoredCv.keywords) ? (rawTailoredCv.keywords as string[]) : [],
-        }
-      : null;
+  const tailoredCv: TailoredCv | null = rawTailoredCv && typeof rawTailoredCv === "object" ? {
+    summary:    typeof rawTailoredCv.summary === "string" ? rawTailoredCv.summary : "",
+    experience: Array.isArray(rawTailoredCv.experience) ? (rawTailoredCv.experience as string[]) : [],
+    skills:     Array.isArray(rawTailoredCv.skills)     ? (rawTailoredCv.skills as string[])     : [],
+    keywords:   Array.isArray(rawTailoredCv.keywords)   ? (rawTailoredCv.keywords as string[])   : [],
+  } : null;
 
-  const actionData: ActionData | null = existingAction
-    ? {
-        should_apply: existingAction.should_apply as boolean,
-        rationale: existingAction.rationale as string,
-        next_steps: Array.isArray(existingAction.next_steps) ? (existingAction.next_steps as string[]) : [],
-        message_draft: existingAction.message_draft as string,
-        cover_note: existingAction.cover_note as string,
-        cv_improvement_points: Array.isArray(existingAction.cv_improvement_points)
-          ? (existingAction.cv_improvement_points as string[])
-          : [],
-        tailored_cv: tailoredCv,
-      }
-    : null;
+  const actionData: ActionData | null = existingAction ? {
+    should_apply:          existingAction.should_apply as boolean,
+    rationale:             existingAction.rationale as string,
+    next_steps:            Array.isArray(existingAction.next_steps)            ? (existingAction.next_steps as string[])            : [],
+    message_draft:         existingAction.message_draft as string,
+    cover_note:            existingAction.cover_note as string,
+    cv_improvement_points: Array.isArray(existingAction.cv_improvement_points) ? (existingAction.cv_improvement_points as string[]) : [],
+    tailored_cv:           tailoredCv,
+  } : null;
+
+  const hasSalary = job.salary_min || job.salary_max;
 
   return (
-    <div className="space-y-6">
-      {/* Back */}
-      <Link
-        href="/app/jobs"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 transition hover:text-slate-800"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        All jobs
+    <div className="max-w-3xl">
+
+      {/* ── Back ────────────────────────────────────────────────────────── */}
+      <Link href="/app/jobs" className="inline-flex items-center gap-2 text-[13px] text-[#9e9b95] transition hover:text-[#1a1916]">
+        ← All roles
       </Link>
 
-      {/* Header */}
-      <div>
-        <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">{job.company}</p>
-        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{job.title}</h2>
-        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-500">
-          {job.location && <span>{job.location}</span>}
-          {job.remote_type && job.remote_type !== "unknown" && (
-            <>
-              <span className="text-slate-300">·</span>
-              <span className="capitalize">{job.remote_type.replace(/_/g, " ")}</span>
-            </>
-          )}
-          {job.experience_level && job.experience_level !== "unknown" && (
-            <>
-              <span className="text-slate-300">·</span>
-              <span className="capitalize">{job.experience_level}</span>
-            </>
-          )}
-          {hasSalary && (
-            <>
-              <span className="text-slate-300">·</span>
-              <span>
-                {job.salary_min ? job.salary_min.toLocaleString() : ""}
-                {job.salary_min && job.salary_max ? " – " : ""}
-                {job.salary_max ? job.salary_max.toLocaleString() : ""}
-                {job.salary_currency ? ` ${job.salary_currency}` : ""}
-              </span>
-            </>
-          )}
-        </div>
+      {/* ── Header ──────────────────────────────────────────────────────── */}
+      <div className="mt-8 mb-10">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#9e9b95]">{job.company}</p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#1a1916]">{job.title}</h1>
+        <p className="mt-3 text-sm text-[#6a6761]">
+          {[
+            job.location,
+            job.remote_type && job.remote_type !== "unknown" ? (job.remote_type as string).replace(/_/g, " ") : null,
+            job.experience_level && job.experience_level !== "unknown" ? job.experience_level : null,
+            hasSalary ? [
+              job.salary_min ? `${Math.round((job.salary_min as number) / 1000)}k` : "",
+              job.salary_max ? `${Math.round((job.salary_max as number) / 1000)}k` : "",
+            ].filter(Boolean).join("–") + ` ${job.salary_currency ?? "AED"}/mo` : null,
+          ].filter(Boolean).join("  ·  ")}
+        </p>
       </div>
 
-      {/* ── Analysis ────────────────────────────────────────────────────────────── */}
+      {/* ── AI analysis ─────────────────────────────────────────────────── */}
       {hasAiAnalysis && matchData && actionData ? (
         <AiAnalysisPanel match={matchData} action={actionData} />
       ) : (
-        <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-5">
+        <div className="rounded-xl border border-[#e2dfd9] bg-white px-8 py-7">
           {hasAiProfile ? (
-            <div className="space-y-3">
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-semibold text-slate-900">{basicMatch.score}%</span>
-                <span className="text-sm text-slate-500">{basicMatch.label}</span>
+            <div className="space-y-5">
+              <div className="flex items-baseline gap-4">
+                <span className="text-4xl font-semibold tabular-nums text-[#1a1916]">
+                  {basicMatch.score}<span className="text-lg font-normal text-[#9e9b95]">%</span>
+                </span>
+                <span className="text-sm text-[#9e9b95]">skill match</span>
               </div>
-
-              {jobSkills.length > 0 && (
-                <div className="space-y-2">
-                  {basicMatch.matched.length > 0 && (
-                    <div>
-                      <p className="mb-1.5 text-xs text-slate-400">
-                        Matching skills ({basicMatch.matched.length})
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {basicMatch.matched.map((s) => (
-                          <Tag key={s} label={s} variant="green" />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {basicMatch.missing.length > 0 && (
-                    <div>
-                      <p className="mb-1.5 text-xs text-slate-400">
-                        Missing skills ({basicMatch.missing.length})
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {basicMatch.missing.map((s) => (
-                          <Tag key={s} label={s} variant="amber" />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
+              {basicMatch.matched.length > 0 && (
+                <p className="text-sm text-[#6a6761]">
+                  <span className="font-medium text-[#1a1916]">Matching:</span>{" "}
+                  {basicMatch.matched.join(", ")}
+                </p>
               )}
-
-              <p className="text-xs text-slate-400">
+              {basicMatch.missing.length > 0 && (
+                <p className="text-sm text-[#6a6761]">
+                  <span className="font-medium text-[#1a1916]">Missing:</span>{" "}
+                  {basicMatch.missing.join(", ")}
+                </p>
+              )}
+              <p className="text-xs text-[#9e9b95]">
                 Basic skill match only. Run a full analysis for detailed guidance.
               </p>
               <AnalyseJobButton jobId={job.id} />
             </div>
           ) : (
-            <p className="text-sm text-slate-500">
-              Generate your{" "}
-              <Link href="/app/profile" className="font-medium text-slate-800 underline underline-offset-2">
-                AI profile
-              </Link>{" "}
-              first, then come back to analyse this job.
+            <p className="text-sm text-[#6a6761]">
+              <Link href="/app/profile" className="font-medium text-[#1a1916] underline underline-offset-4">
+                Build your AI profile
+              </Link>
+              {" "}to analyse this role.
             </p>
           )}
         </div>
       )}
 
-      {/* Description */}
-      <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-6">
-        <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Job description</p>
-        <p className="whitespace-pre-line text-sm leading-7 text-slate-700">{job.description}</p>
+      {/* ── Description ─────────────────────────────────────────────────── */}
+      <div className="mt-12">
+        <p className="mb-5 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#9e9b95]">About the Role</p>
+        <p className="whitespace-pre-line text-sm leading-8 text-[#3a3835]">{job.description}</p>
       </div>
 
-      {/* Apply CTA */}
+      {/* ── Apply ───────────────────────────────────────────────────────── */}
       {job.apply_url && (
-        <a
-          href={job.apply_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex h-11 items-center gap-2 rounded-xl bg-slate-900 px-6 text-sm font-medium text-white transition hover:bg-slate-700"
-        >
-          Apply for this role
-          <ExternalLink className="h-3.5 w-3.5 opacity-70" />
-        </a>
+        <div className="mt-10 border-t border-[#e2dfd9] pt-8">
+          <a
+            href={job.apply_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-12 items-center gap-3 rounded-lg bg-[#0c0c0c] px-8 text-sm font-medium text-white/80 transition hover:bg-[#1a1a1a] hover:text-white"
+          >
+            Apply for this role
+            <span className="text-white/30">↗</span>
+          </a>
+        </div>
       )}
     </div>
   );

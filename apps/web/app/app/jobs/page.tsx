@@ -15,13 +15,6 @@ function formatSalary(min?: number | null, max?: number | null, currency?: strin
   return `≤${fmt(max!)} ${curr}`;
 }
 
-function scoreColor(score: number): { bar: string; text: string; border: string } {
-  if (score >= 70) return { bar: "bg-emerald-500", text: "text-emerald-600", border: "border-l-emerald-400" };
-  if (score >= 40) return { bar: "bg-amber-400",   text: "text-amber-500",   border: "border-l-amber-400" };
-  if (score >= 20) return { bar: "bg-orange-300",  text: "text-orange-500",  border: "border-l-orange-300" };
-  return               { bar: "bg-rose-300",    text: "text-rose-400",   border: "border-l-rose-300" };
-}
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function JobsPage() {
@@ -57,85 +50,79 @@ export default async function JobsPage() {
 
   return (
     <div>
-      {/* ── Page header ─────────────────────────────────────────────────── */}
-      <div className="mb-8 flex items-end justify-between border-b border-slate-100 pb-6">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">UAE Roles</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">
-            {jobsWithScores.length} positions
-          </h1>
-          <p className="mt-1 text-sm text-slate-400">Sorted by AI match · Gulf market only</p>
-        </div>
+      {/* ── Header ──────────────────────────────────────────────────────── */}
+      <div className="mb-10">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#9e9b95]">Gulf Market</p>
+        <h1 className="mt-2 text-4xl font-semibold tracking-tight text-[#1a1916]">
+          {jobsWithScores.length} Positions
+        </h1>
         {!hasAiProfile && (
-          <Link
-            href="/app/profile"
-            className="inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs font-semibold text-amber-800 transition hover:bg-amber-100"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-            Set up AI profile to see scores
-          </Link>
+          <p className="mt-3 text-sm text-[#8b7355]">
+            <Link href="/app/profile" className="underline underline-offset-4 decoration-[#8b7355]/40 hover:decoration-[#8b7355]">
+              Complete your profile
+            </Link>
+            {" "}to see match scores.
+          </p>
         )}
       </div>
 
-      {/* ── Jobs list ───────────────────────────────────────────────────── */}
-      <div className="space-y-px">
+      {/* ── Column headers ──────────────────────────────────────────────── */}
+      <div className="mb-3 flex items-center justify-between border-b border-[#e2dfd9] pb-3">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#9e9b95]">Role</p>
+        {hasAiProfile && (
+          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#9e9b95]">Match</p>
+        )}
+      </div>
+
+      {/* ── Rows ────────────────────────────────────────────────────────── */}
+      <div className="divide-y divide-[#e2dfd9]">
         {jobsWithScores.map((job) => {
           const salary = formatSalary(job.salary_min, job.salary_max, job.salary_currency);
           const location = job.city ?? job.location;
-          const isUAE = job.country_code === "AE";
-          const col = scoreColor(job.match.score);
-          const initials = job.company.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
 
           return (
             <Link
               key={job.id}
               href={`/app/jobs/${job.id}`}
-              className={`group flex items-center gap-5 rounded-xl border-l-[3px] bg-white px-6 py-4 transition-all hover:bg-slate-50 hover:shadow-sm ${hasAiProfile ? col.border : "border-l-slate-200"}`}
+              className="group flex items-center gap-8 py-5 transition-colors hover:bg-white/60 -mx-12 px-12"
             >
-              {/* Avatar */}
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[11px] font-bold text-slate-600">
-                {initials}
-              </div>
-
-              {/* Role info */}
+              {/* Role */}
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[15px] font-semibold text-slate-950 leading-tight">
-                    {job.title}
-                  </span>
-                  {job.match.matched.slice(0, 4).map((s: string) => (
-                    <span key={s} className="rounded border border-slate-200 bg-slate-50 px-1.5 py-px text-[10px] font-medium text-slate-600">
-                      {s}
-                    </span>
-                  ))}
-                  {job.match.matched.length > 4 && (
-                    <span className="text-[10px] text-slate-400">+{job.match.matched.length - 4}</span>
+                <p className="text-[15px] font-semibold text-[#1a1916] leading-tight group-hover:text-black">
+                  {job.title}
+                </p>
+                <p className="mt-1 text-sm text-[#6a6761]">
+                  {job.company}
+                  {location && <> · {location}</>}
+                  {job.remote_type && job.remote_type !== "unknown" && (
+                    <> · <span className="capitalize">{(job.remote_type as string).replace(/_/g, " ")}</span></>
                   )}
-                </div>
-                <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0">
-                  <span className="text-sm font-medium text-slate-500">{job.company}</span>
-                  {location && <><span className="text-slate-300">·</span><span className="text-sm text-slate-400">{location}{isUAE ? " 🇦🇪" : ""}</span></>}
-                  {job.remote_type && job.remote_type !== "unknown" && <><span className="text-slate-300">·</span><span className="text-sm capitalize text-slate-400">{(job.remote_type as string).replace(/_/g, " ")}</span></>}
-                  {job.experience_level && job.experience_level !== "unknown" && <><span className="text-slate-300">·</span><span className="text-sm capitalize text-slate-400">{job.experience_level}</span></>}
-                  {salary && <><span className="text-slate-300">·</span><span className="text-sm font-semibold text-slate-500">{salary}/mo</span></>}
-                </div>
+                  {job.experience_level && job.experience_level !== "unknown" && (
+                    <> · <span className="capitalize">{job.experience_level}</span></>
+                  )}
+                  {salary && <> · <span className="font-medium text-[#1a1916]">{salary}/mo</span></>}
+                </p>
               </div>
 
               {/* Score */}
-              <div className="shrink-0 flex items-center gap-4">
-                {hasAiProfile ? (
-                  <div className="flex flex-col items-end gap-1.5">
-                    <span className={`text-2xl font-bold tabular-nums leading-none ${col.text}`}>
-                      {job.match.score}<span className="text-xs font-normal opacity-40">%</span>
+              <div className="shrink-0 flex items-center gap-6">
+                {hasAiProfile && (
+                  <div className="flex flex-col items-end gap-1.5 w-16">
+                    <span className="text-[22px] font-semibold tabular-nums leading-none text-[#1a1916]">
+                      {job.match.score}
+                      <span className="text-xs font-normal text-[#9e9b95]">%</span>
                     </span>
-                    <div className="h-1 w-16 overflow-hidden rounded-full bg-slate-100">
-                      <div className={`h-full rounded-full ${col.bar}`} style={{ width: `${job.match.score}%` }} />
+                    <div className="h-px w-full bg-[#e2dfd9]">
+                      <div
+                        className="h-px bg-[#1a1916] transition-all"
+                        style={{ width: `${job.match.score}%` }}
+                      />
                     </div>
                   </div>
-                ) : (
-                  <span className="text-slate-300">—</span>
                 )}
-                <span className="text-slate-200 transition-transform group-hover:translate-x-1 duration-150 text-sm">→</span>
+                <span className="text-[#d4d1cb] transition-transform group-hover:translate-x-0.5 duration-150 text-sm">
+                  →
+                </span>
               </div>
             </Link>
           );
