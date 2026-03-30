@@ -1,55 +1,37 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { PageIntro } from "@/components/layout/page-intro";
 import { computeMatch, type FitLabel } from "@/lib/matching/score";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const fitStyles: Record<FitLabel, string> = {
-  "Good fit": "bg-emerald-50 text-emerald-700 border-emerald-200",
-  "Partial fit": "bg-amber-50 text-amber-700 border-amber-200",
-  "Low fit": "bg-slate-100 text-slate-500 border-slate-200",
+const scoreStyles: Record<FitLabel, { bar: string; text: string; bg: string }> = {
+  "Good fit":    { bar: "bg-emerald-500", text: "text-emerald-700", bg: "bg-emerald-50 border-emerald-200" },
+  "Partial fit": { bar: "bg-amber-400",   text: "text-amber-700",   bg: "bg-amber-50 border-amber-200" },
+  "Low fit":     { bar: "bg-slate-300",   text: "text-slate-500",   bg: "bg-slate-100 border-slate-200" },
 };
 
-function FitBadge({ label, score }: { label: FitLabel; score: number }) {
+function ScorePill({ label, score }: { label: FitLabel; score: number }) {
+  const s = scoreStyles[label];
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${fitStyles[label]}`}>
-      <span>{score}%</span>
-      <span className="opacity-60">·</span>
-      <span>{label}</span>
+    <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${s.bg} ${s.text}`}>
+      <span
+        className={`h-1.5 w-1.5 rounded-full ${s.bar}`}
+      />
+      {score}% · {label}
     </span>
   );
 }
 
-function MetaTag({ label }: { label: string }) {
-  return (
-    <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs capitalize text-slate-500">
-      {label.replace(/_/g, " ")}
-    </span>
-  );
-}
-
-function MatchedSkillPreview({ skills }: { skills: string[] }) {
-  if (skills.length === 0) return null;
-  const preview = skills.slice(0, 3);
-  const remaining = skills.length - preview.length;
-  return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      {preview.map((s) => (
-        <span
-          key={s}
-          className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700"
-        >
-          {s}
-        </span>
-      ))}
-      {remaining > 0 && (
-        <span className="text-xs text-slate-400">+{remaining} more</span>
-      )}
-    </div>
-  );
+function formatSalary(min?: number | null, max?: number | null, currency?: string | null) {
+  if (!min && !max) return null;
+  const fmt = (n: number) =>
+    n >= 1000 ? `${Math.round(n / 1000)}k` : String(n);
+  const curr = currency ?? "AED";
+  if (min && max) return `${fmt(min)} – ${fmt(max)} ${curr}/mo`;
+  if (min) return `From ${fmt(min)} ${curr}/mo`;
+  return `Up to ${fmt(max!)} ${curr}/mo`;
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -65,7 +47,7 @@ export default async function JobsPage() {
   const [{ data: jobs }, { data: aiProfile }] = await Promise.all([
     supabase
       .from("jobs")
-      .select("id, title, company, location, remote_type, experience_level, required_skills, published_at")
+      .select("id, title, company, location, city, country_code, remote_type, experience_level, required_skills, published_at, salary_min, salary_max, salary_currency")
       .eq("is_active", true)
       .order("published_at", { ascending: false })
       .limit(50),
@@ -92,65 +74,113 @@ export default async function JobsPage() {
     .sort((a, b) => b.match.score - a.match.score);
 
   return (
-    <div className="space-y-6">
-      <PageIntro
-        title="Jobs"
-        description="Gulf tech roles matched against your AI profile. Scores are based on skill overlap."
-      />
-
-      {/* No AI profile warning */}
-      {!hasAiProfile && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
-          <span className="font-medium">Match scores are unavailable.</span> Generate your AI profile on the{" "}
-          <Link href="/app/profile" className="underline underline-offset-2">
-            Profile page
-          </Link>{" "}
-          to see how well you fit each role.
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-baseline justify-between">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-slate-950">UAE Roles</h1>
+          <p className="mt-0.5 text-xs text-slate-400">
+            {jobsWithScores.length} curated positions · sorted by match
+          </p>
         </div>
-      )}
+        {!hasAiProfile && (
+          <Link
+            href="/app/profile"
+            className="text-xs font-medium text-amber-700 underline underline-offset-2"
+          >
+            Generate AI profile to see scores
+          </Link>
+        )}
+      </div>
 
       {/* Jobs list */}
       {jobsWithScores.length === 0 ? (
-        <div className="rounded-2xl border border-slate-100 bg-slate-50/60 px-6 py-10 text-center text-sm text-slate-400">
-          No jobs available right now.
+        <div className="rounded-2xl border border-slate-100 bg-slate-50/60 px-6 py-12 text-center text-sm text-slate-400">
+          No roles available right now.
         </div>
       ) : (
-        <div className="space-y-3">
-          {jobsWithScores.map((job) => (
-            <Link
-              key={job.id}
-              href={`/app/jobs/${job.id}`}
-              className="group block rounded-2xl border border-slate-100 bg-white p-5 transition hover:border-slate-300 hover:shadow-sm"
-            >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0">
-                  <p className="font-semibold text-slate-900 group-hover:text-slate-700">{job.title}</p>
-                  <p className="mt-0.5 text-sm text-slate-500">
-                    {job.company}
-                    {job.location ? ` · ${job.location}` : ""}
-                  </p>
-                </div>
-                <div className="shrink-0">
-                  <FitBadge label={job.match.label} score={job.match.score} />
-                </div>
-              </div>
+        <div className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+          {jobsWithScores.map((job) => {
+            const salary = formatSalary(job.salary_min, job.salary_max, job.salary_currency);
+            const location = job.city ?? job.location;
+            const isUAE = job.country_code === "AE";
 
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {job.experience_level && job.experience_level !== "unknown" && (
-                  <MetaTag label={job.experience_level} />
-                )}
-                {job.remote_type && job.remote_type !== "unknown" && (
-                  <MetaTag label={job.remote_type} />
-                )}
-              </div>
+            return (
+              <Link
+                key={job.id}
+                href={`/app/jobs/${job.id}`}
+                className="group flex items-center gap-4 px-5 py-4 transition hover:bg-slate-50/80"
+              >
+                {/* Score bar */}
+                <div className="hidden w-1 shrink-0 self-stretch rounded-full sm:block"
+                  style={{ background: job.match.score >= 70 ? "#10b981" : job.match.score >= 40 ? "#f59e0b" : "#cbd5e1" }}
+                />
 
-              {job.match.matched.length > 0 && (
-                <div className="mt-2">
-                  <MatchedSkillPreview skills={job.match.matched} />
+                {/* Main content */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-start gap-x-3 gap-y-1">
+                    <p className="text-sm font-semibold text-slate-950 group-hover:text-slate-700">
+                      {job.title}
+                    </p>
+                    {hasAiProfile && (
+                      <ScorePill label={job.match.label} score={job.match.score} />
+                    )}
+                  </div>
+
+                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                    <span className="text-xs font-medium text-slate-600">{job.company}</span>
+                    {location && (
+                      <>
+                        <span className="text-slate-300">·</span>
+                        <span className="text-xs text-slate-400">
+                          {location}{isUAE ? " 🇦🇪" : ""}
+                        </span>
+                      </>
+                    )}
+                    {job.remote_type && job.remote_type !== "unknown" && (
+                      <>
+                        <span className="text-slate-300">·</span>
+                        <span className="text-xs capitalize text-slate-400">
+                          {(job.remote_type as string).replace(/_/g, " ")}
+                        </span>
+                      </>
+                    )}
+                    {job.experience_level && job.experience_level !== "unknown" && (
+                      <>
+                        <span className="text-slate-300">·</span>
+                        <span className="text-xs capitalize text-slate-400">{job.experience_level}</span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Matched skills + salary */}
+                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+                    {job.match.matched.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {job.match.matched.slice(0, 4).map((s) => (
+                          <span
+                            key={s}
+                            className="rounded border border-emerald-200 bg-emerald-50 px-1.5 py-px text-[10px] font-medium text-emerald-700"
+                          >
+                            {s}
+                          </span>
+                        ))}
+                        {job.match.matched.length > 4 && (
+                          <span className="text-[10px] text-slate-400">+{job.match.matched.length - 4}</span>
+                        )}
+                      </div>
+                    )}
+                    {salary && (
+                      <span className="text-[11px] font-medium text-slate-400">{salary}</span>
+                    )}
+                  </div>
                 </div>
-              )}
-            </Link>
-          ))}
+
+                {/* Arrow */}
+                <span className="shrink-0 text-slate-300 transition group-hover:text-slate-500">→</span>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>

@@ -10,18 +10,27 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const recommendationStyles = {
   apply: {
-    card: "border-emerald-200 bg-emerald-50",
-    badge: "bg-emerald-600 text-white",
+    outer: "border-emerald-200 bg-emerald-50",
+    banner: "bg-emerald-600",
+    word: "Apply",
+    icon: "✓",
+    detail: "text-emerald-800",
     label: "Apply",
   },
   maybe: {
-    card: "border-amber-200 bg-amber-50",
-    badge: "bg-amber-500 text-white",
+    outer: "border-amber-200 bg-amber-50",
+    banner: "bg-amber-500",
+    word: "Consider",
+    icon: "△",
+    detail: "text-amber-800",
     label: "Consider",
   },
   skip: {
-    card: "border-red-200 bg-red-50",
-    badge: "bg-red-500 text-white",
+    outer: "border-red-200 bg-red-50",
+    banner: "bg-red-500",
+    word: "Pass",
+    icon: "✕",
+    detail: "text-red-800",
     label: "Skip",
   },
 } as const;
@@ -82,53 +91,58 @@ type ActionData = {
 function FitCard({ match, rationale }: { match: MatchData; rationale: string }) {
   const rec = recommendationStyles[match.recommendation];
   return (
-    <div className={`rounded-2xl border p-5 ${rec.card}`}>
-      <div className="flex flex-wrap items-center gap-3">
-        <span className={`rounded-full px-4 py-1.5 text-sm font-semibold ${rec.badge}`}>{rec.label}</span>
-        <span className="text-2xl font-semibold text-slate-900">{match.score}%</span>
-        <span className="text-sm text-slate-500">{rationale}</span>
+    <div className={`overflow-hidden rounded-2xl border ${rec.outer}`}>
+      {/* ── Instant verdict banner ── */}
+      <div className={`flex items-center gap-4 px-6 py-5 ${rec.banner}`}>
+        <span className="text-4xl font-bold tracking-tight text-white">{rec.word}</span>
+        <div className="h-8 w-px bg-white/30" />
+        <span className="text-4xl font-semibold text-white">{match.score}%</span>
+        <p className="ml-1 max-w-sm text-sm leading-snug text-white/80">{rationale}</p>
       </div>
 
-      {match.strengths.length > 0 && (
-        <div className="mt-4">
-          <SectionLabel>Strengths</SectionLabel>
-          <ul className="space-y-1">
-            {match.strengths.map((s) => (
-              <li key={s} className="flex gap-2 text-sm text-slate-700">
-                <span className="mt-0.5 text-emerald-500">✓</span>
-                {s}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {/* ── Details ── */}
+      <div className="divide-y divide-slate-200/60 px-6">
+        {match.strengths.length > 0 && (
+          <div className="py-4">
+            <SectionLabel>Strengths</SectionLabel>
+            <ul className="space-y-1.5">
+              {match.strengths.map((s) => (
+                <li key={s} className="flex gap-2 text-sm text-slate-700">
+                  <span className="mt-0.5 text-emerald-500">✓</span>
+                  {s}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-      {match.gaps.length > 0 && (
-        <div className="mt-4">
-          <SectionLabel>Gaps</SectionLabel>
-          <ul className="space-y-1">
-            {match.gaps.map((g) => (
-              <li key={g} className="flex gap-2 text-sm text-slate-700">
-                <span className="mt-0.5 text-amber-500">△</span>
-                {g}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {match.gaps.length > 0 && (
+          <div className="py-4">
+            <SectionLabel>Gaps</SectionLabel>
+            <ul className="space-y-1.5">
+              {match.gaps.map((g) => (
+                <li key={g} className="flex gap-2 text-sm text-slate-700">
+                  <span className="mt-0.5 text-amber-500">△</span>
+                  {g}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-      {match.reasons.length > 0 && (
-        <div className="mt-4">
-          <SectionLabel>Why this score</SectionLabel>
-          <ul className="space-y-1 pl-4">
-            {match.reasons.map((r) => (
-              <li key={r} className="list-disc text-sm text-slate-600">
-                {r}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {match.reasons.length > 0 && (
+          <div className="py-4">
+            <SectionLabel>Why this score</SectionLabel>
+            <ul className="space-y-1 pl-4">
+              {match.reasons.map((r) => (
+                <li key={r} className="list-disc text-sm text-slate-600">
+                  {r}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
